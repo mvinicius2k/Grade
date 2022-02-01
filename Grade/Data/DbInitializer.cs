@@ -55,7 +55,7 @@ namespace Grade.Data
             };
             var programs = new ProgramBase[]
             {
-                new WeeklyProgram
+                new WeeklyProgram2
                 {
                     Name = "Asa Branca Esporte Clube",
                     StartDay = DayOfWeek.Monday,
@@ -67,7 +67,7 @@ namespace Grade.Data
                     
 
                 },
-                new WeeklyProgram
+                new WeeklyProgram2
                 {
                     Name = "Tarde Show",
                     StartDay = DayOfWeek.Monday,
@@ -78,7 +78,7 @@ namespace Grade.Data
                     Active = true,
 
                 },
-                new LooseProgram
+                new LooseProgram2
                 {
                     Name = "Jornada Esportiva",
                     StartAt = new DateTime(2021, 01, 29, 18,0 ,0),

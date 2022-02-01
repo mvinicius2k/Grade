@@ -6,9 +6,9 @@ namespace Grade.Models
     {
         public int Id { get; set; }
 
-        [Required][StringLength(100)]
+        [Required][MaxLength(100)]
         public string Name { get; set; }
-        [Required][StringLength(200)]
+        [Required][MaxLength(200)]
         public string Description { get; set; }
         public bool Active { get; set; }
         

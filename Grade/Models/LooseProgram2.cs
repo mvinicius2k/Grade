@@ -5,7 +5,7 @@ namespace Grade.Models
     /// <summary>
     /// Programas avulsos serão sobrepostos aos programas semanais
     /// </summary>
-    public class LooseProgram : ProgramBase, IResolveTypesPgsql
+    public class LooseProgram2 : ProgramBase, IResolveTypesPgsql
     {
 
         [DataType(DataType.DateTime)]

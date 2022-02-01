@@ -13,7 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<GradeContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString(ConnectionKey))
             );
-builder.Services.AddDatabaseDeveloperPageExceptionFilter(); //Exibir erros
+//builder.Services.AddDatabaseDeveloperPageExceptionFilter(); //Exibir erros
 builder.Services.AddControllersWithViews();
 
 

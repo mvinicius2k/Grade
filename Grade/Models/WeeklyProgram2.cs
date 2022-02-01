@@ -1,6 +1,6 @@
 ﻿namespace Grade.Models
 {
-    public class WeeklyProgram : Models.ProgramBase
+    public class WeeklyProgram2 : ProgramBase
     {
         public TimeOnly StartAt { get; set; }
         public TimeOnly EndAt { get; set; }
