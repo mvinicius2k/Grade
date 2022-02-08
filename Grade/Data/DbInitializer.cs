@@ -53,9 +53,9 @@ namespace Grade.Data
                 new Presenter{ Name = "Playlist"},
                 new Presenter{ Name = "Equipe Esportiva"}
             };
-            var programs = new ProgramBase[]
+            var programs = new Section[]
             {
-                new WeeklyProgram
+                new WeeklySection
                 {
                     Name = "Asa Branca Esporte Clube",
                     StartDay = DayOfWeek.Monday,
@@ -67,7 +67,7 @@ namespace Grade.Data
                     
 
                 },
-                new WeeklyProgram
+                new WeeklySection
                 {
                     Name = "Tarde Show",
                     StartDay = DayOfWeek.Monday,
@@ -78,7 +78,7 @@ namespace Grade.Data
                     Active = true,
 
                 },
-                new LooseProgram
+                new LooseSection
                 {
                     Name = "Jornada Esportiva",
                     StartAt = new DateTime(2021, 01, 29, 18,0 ,0),
@@ -116,17 +116,17 @@ namespace Grade.Data
                 new Apresentation
                 {
                     PresenterId = context.Presenters.First(x => x.Name == "Valdenir Rodrigues").Id,
-                    ProgramBaseId = context.ProgramsBase.First(x => x.Name == "Asa Branca Esporte Clube").Id,
+                    SectionId = context.ProgramsBase.First(x => x.Name == "Asa Branca Esporte Clube").Id,
                 },
                 new Apresentation
                 {
                     PresenterId = context.Presenters.First(x => x.Name == "Playlist").Id,
-                    ProgramBaseId = context.ProgramsBase.First(x => x.Name == "Tarde Show").Id,
+                    SectionId = context.ProgramsBase.First(x => x.Name == "Tarde Show").Id,
                 },
                 new Apresentation
                 {
                     PresenterId = context.Presenters.First(x => x.Name == "Equipe Esportiva").Id,
-                    ProgramBaseId = context.ProgramsBase.First(x => x.Name == "Jornada Esportiva").Id,
+                    SectionId = context.ProgramsBase.First(x => x.Name == "Jornada Esportiva").Id,
                 }
             };
 

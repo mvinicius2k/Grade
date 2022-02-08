@@ -16,20 +16,23 @@ namespace Grade.Data
 
         public DbSet<Presenter> Presenters { get; set; }
         public DbSet<Apresentation> Apresentations { get; set; }
-        public DbSet<ProgramBase> ProgramsBase { get; set; }
-        public DbSet<WeeklyProgram> WeeklyPrograms { get; set; }
-        public DbSet<LooseProgram> LoosePrograms { get; set; }
+        public DbSet<Section> ProgramsBase { get; set; }
+        public DbSet<WeeklySection> WeeklyPrograms { get; set; }
+        public DbSet<LooseSection> LoosePrograms { get; set; }
         public DbSet<Resource> Resources { get; set; }
 
         protected override void OnModelCreating(ModelBuilder mb)
         {
             
             mb.Entity<Resource>().ToTable(nameof(Resource));
-            mb.Entity<LooseProgram>().ToTable(nameof(LooseProgram));
-            mb.Entity<WeeklyProgram>().ToTable(nameof(WeeklyProgram));
-            mb.Entity<ProgramBase>().ToTable(nameof(ProgramBase));
+            mb.Entity<Section>().ToTable(nameof(Section));
+            mb.Entity<LooseSection>().ToTable(nameof(LooseSection));
+            mb.Entity<WeeklySection>().ToTable(nameof(WeeklySection));
             mb.Entity<Apresentation>().ToTable(nameof(Apresentation));
-            mb.Entity<Presenter>().ToTable(nameof(Presenter));
+            mb.Entity<Presenter>().ToTable(nameof(Presenter))
+                .HasMany(x => x.Apresentations)
+                .WithOne(x => x.Presenter)
+                .OnDelete(DeleteBehavior.Cascade);
 
 
 

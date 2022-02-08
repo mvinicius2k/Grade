@@ -23,7 +23,7 @@ namespace Grade
                 options.UseNpgsql(Configuration.GetConnectionString(ConnectionKey))
             );
             services.AddDatabaseDeveloperPageExceptionFilter(); //Exibir erros
-            services.AddControllersWithViews();
+            
 
             //Exigindo autorização para acessar arquivos
             /*services.AddAuthorization(options =>
