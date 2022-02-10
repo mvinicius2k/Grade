@@ -1,6 +1,7 @@
 using Grade;
 using Grade.Data;
 using Grade.Models;
+using Grade.Models.Dto;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.Application;
@@ -17,8 +18,13 @@ var builder = WebApplication.CreateBuilder(args);
 //startup.ConfigureServices(builder.Services);
 
 builder.Services.AddDbContext<GradeContext>(options =>
-                options.UseNpgsql(builder.Configuration.GetConnectionString(ConnectionKey))
-            );
+{
+    options.UseNpgsql(builder.Configuration.GetConnectionString(ConnectionKey));
+    options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking); 
+    
+});
+    
+
 builder.Services.AddDatabaseDeveloperPageExceptionFilter(); //Exibir erros
 
 builder.Services.AddControllers().AddJsonOptions(options => {
@@ -31,23 +37,38 @@ builder.Services.AddControllers().AddJsonOptions(options => {
 
  builder.Services.AddSwaggerGen(g =>
 {
+
     g.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
     {
         Version = "v1",
         Title = "API da Grade de Programação",
     });
+    
 
 });
 
+var mapperConfig = new AutoMapper.MapperConfiguration(cfg =>
+{
+    cfg.CreateMap<PresenterDto, Presenter>()
+       .ForMember(dest => dest.ResourceId, opt => opt.MapFrom(src => src.ImageResource.Id));
+
+    cfg.CreateMap<WeeklySectionDto, Section>()
+        .ForMember(dest => dest.ResourceId, opt => opt.MapFrom(src => src.ImageResource.Id));
+        
+    cfg.CreateMap<Section, WeeklySectionDetailsDto>()
+        .ForMember(dest => dest.ImageResource.Id, opt => opt.MapFrom(src => src.ResourceId))
+        .ForMember(dest => dest.Presenters , opt => opt.MapFrom(src => src.Apresentations.Select(x => x.Presenter)));
+    /*cfg.CreateMap<Presenter, PresenterDetailsDto>()
+        .ForMember(dest => dest.Sections, opt => opt.MapFrom(src => ))*/
+
+});
+
+var mapper = mapperConfig.CreateMapper();
+
+builder.Services.AddSingleton(mapper);
+
 var app = builder.Build();
 
-/*var httpConfig = new HttpConfiguration();
-
-httpConfig.EnableSwagger(
-    x => x.SingleApiVersion("v1", "API da Grade de Programação"))
-    .EnableSwaggerUi();*/
-
-    
     
     
 // Configure the HTTP request pipeline.
@@ -81,8 +102,10 @@ app.UseSwaggerUI(c => {
     c.SwaggerEndpoint("swagger/v1/swagger.json", "GradeAPI V1");
     c.RoutePrefix = string.Empty;
 
-
 });
+
+
+
 
 
 /*app.UseStaticFiles(new StaticFileOptions

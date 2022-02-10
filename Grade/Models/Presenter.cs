@@ -1,5 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using NSwag.Annotations;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Grade.Models
 {
@@ -7,16 +12,17 @@ namespace Grade.Models
     {
         public int Id { get; set; }
 
-        [Required]
+        [Required(AllowEmptyStrings = false)]
         [MaxLength(50)]
         public string Name { get; set; }
         
-        public int? ResourceId { get; set; }
+        public int ResourceId { get; set; }
 
-        [NotMapped]
-        public ICollection<Apresentation> Apresentations { get; set; }
-
-        public Resource Resource { get; set; }
+        public ICollection<Apresentation> Apresentations { get;  set; }
+        
+        
+        public Resource Resource { get;  set; }
+        
 
     }
 }

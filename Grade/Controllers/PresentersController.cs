@@ -9,41 +9,39 @@ using Microsoft.EntityFrameworkCore;
 using Grade.Data;
 using Grade.Models;
 using Grade.Helpers;
+using Grade.Models.Dto;
+using AutoMapper;
 
 namespace Grade.Controllers
 {
-
+    [ApiController][Route("[controller]")]
     public class PresentersController : Controller
     {
         private readonly GradeContext _context;
         private readonly ILogger _logger;
+        private readonly IMapper _mapper;
 
 
-        public PresentersController(GradeContext context, ILogger<PresentersController> logger)
+        public PresentersController(GradeContext context, ILogger<PresentersController> logger, IMapper mapper)
         {
             _context = context;
             _logger = logger;
+            _mapper = mapper;
         }
 
         // GET: Presenters
         [HttpGet]
-        [Route("presenters")]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Get()
         {
             return Ok(await _context.Presenters.ToListAsync());
         }
 
         // GET: Presenters/Details/5
-        [HttpGet]
-        [Route("presenters/details/")]
-        public async Task<IActionResult> Details([FromQuery] int? id)
+        [HttpGet("{id}")]
+        //[ActionName("details")]
+        public async Task<IActionResult> GetOne([FromRoute] int id)
         {
-            if (id == null)
-            {
-                
-                return NotFound();
-            }
-
+            
             var presenter = await _context.Presenters
                 .Include(x => x.Apresentations)
                 .ThenInclude(x => x.Section)
@@ -53,8 +51,61 @@ namespace Grade.Controllers
             {
                 return NotFound();
             }
+
             
-            return Ok(presenter);
+
+            var sections = new SectionDto[presenter.Apresentations.Count];
+
+            var i = 0;
+            foreach(var apresentation in presenter.Apresentations)
+            {
+                if(apresentation.Section is WeeklySection)
+                {
+                    var weeklySection = (apresentation.Section as WeeklySection);
+                    //sections[i++] = new WeeklySectionDto()
+                    //{
+                    //    Id = weeklySection.Id,
+                    //    Active = weeklySection.Active,
+                    //    Name = weeklySection.Name,
+                    //    Description = weeklySection.Description,
+                    //    StartAt = weeklySection.StartAt,
+                    //    StartDay = weeklySection.StartDay,
+                    //    EndAt = weeklySection.EndAt,
+                    //    EndDay = weeklySection.EndDay,
+                    //    ImageUrl = weeklySection.Resource?.Url,
+                    //};
+                    sections[i++] = _mapper.Map<WeeklySectionDto>(weeklySection);
+                } else if(apresentation.Section is LooseSection)
+                {
+                    var looseSection = (apresentation.Section as LooseSection);
+
+                    sections[i++] = new LooseSectionDto()
+                    {
+                        Id = looseSection.Id,
+                        Active = looseSection.Active,
+                        Name = looseSection.Name,
+                        Description = looseSection.Description,
+                        StartAt = looseSection.StartAt,
+                        EndAt = looseSection.EndAt,
+                        //ImageUrl = looseSection.Resource?.Url,
+                        
+                    };
+                }
+
+                
+            }
+
+            var presenterDto = new PresenterDetailsDto()
+            {
+                Id = presenter.Id,
+                //ImageUrl = presenter.Resource?.Url,
+                Name = presenter.Name,
+                Sections = sections
+            };
+
+           
+            
+            return Ok(presenterDto);
         }
 
         /*
@@ -72,54 +123,40 @@ namespace Grade.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Route("presenters/create")]
-        public async Task<IActionResult> Create([Bind("Name,ResourceId")] Presenter presenter)
+        //[Route("presenters/create")]
+        public async Task<ActionResult<Presenter>> Create(PresenterDto presenter)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
-                    _context.Add(presenter);
+                    var presenterToAdd = _mapper.Map<Presenter>(presenter);
+                    _context.Presenters.Add(presenterToAdd);
                     await _context.SaveChangesAsync();
                     return Ok(presenter);
                 }
             }
             catch (DbUpdateException ex)
             {
-                ModelState.AddModelError(String.Empty, StringUtils.DefaultFatalError);
+                ModelState.AddModelError(string.Empty, StringUtils.DefaultFatalError);
                 _logger.LogError($"Não foi possível salvar: {ex.Message}", ex);
                 
             }
             return Ok(presenter);
         }
 
-        // GET: Presenters/Edit/5
-        /*[HttpGet]
-        [Route("presenters/edit/{id?}")]
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var presenter = await _context.Presenters.FindAsync(id);
-            if (presenter == null)
-            {
-                return NotFound();
-            }
-            return View(presenter);
-        }*/
+        
+       
 
         // POST: Presenters/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPut]
         [ValidateAntiForgeryToken]
-        [Route("presenters/edit/{id?}")]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,ResourceId")] Presenter presenter)
+        //[Route("presenters/edit/")]
+        public async Task<IActionResult> Edit([Bind("Id,Name,ResourceId")] Presenter presenter)
         {
-            if (id != presenter.Id)
+            if (_context.Presenters.FirstOrDefault(x => x.Id == presenter.Id) == null)
             {
                 return NotFound();
             }
@@ -171,7 +208,7 @@ namespace Grade.Controllers
         // POST: Presenters/Delete/5
         [HttpDelete, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        [Route("presenters/delete/{id?}")]
+        //[Route("presenters/delete/{id?}")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var presenter = await _context.Presenters.FindAsync(id);
