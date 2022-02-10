@@ -1,21 +1,19 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace Grade.Models
+namespace Grade.Models.Dto
 {
-    public class Resource : IResolveTypesPgsql
+    public class ResourceDto : IResolveTypesPgsql
     {
         public int Id { get; set; }
         [Required(AllowEmptyStrings = false)]
         public string Url { get; set; }
         public DateTime UploadedAt { get; set; }
 
-        public ICollection<Section> Sections { get; set; }
-        public ICollection<Presenter> Presenters { get; set; }
-
+     
         public void ResolveTypesPgsql()
         {
             UploadedAt = UploadedAt.ToUniversalTime();
         }
+
     }
 }
