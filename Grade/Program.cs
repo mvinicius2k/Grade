@@ -46,7 +46,8 @@ builder.Services.AddControllers().AddJsonOptions(options => {
 var mapperConfig = new AutoMapper.MapperConfiguration(cfg =>
 {
     cfg.CreateMap<PresenterDto, Presenter>()
-       .ForMember(dest => dest.ResourceId, opt => opt.MapFrom(src => src.ImageId));
+       .ForMember(dest => dest.ResourceId, opt => opt.MapFrom(src => src.ImageId))
+       .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id));
 
     cfg.CreateMap<Presenter, PresenterDetailsDto>()
         .ForMember(dest => dest.ImageResource, opt => opt.MapFrom(src => src.Resource));

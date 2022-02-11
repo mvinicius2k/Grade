@@ -29,13 +29,6 @@ namespace Grade.Controllers
             _mapper = mapper;
         }
 
-        // GET: Presenters
-        [HttpGet]
-        
-        public async Task<IActionResult> Index()
-        {
-            return Ok(await _context.Presenters.ToListAsync());
-        }
 
         // GET: Presenters/Details/5
         [HttpGet("{id}")]
@@ -108,20 +101,19 @@ namespace Grade.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPut]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Presenter presenter)
+        [IgnoreAntiforgeryToken]
+        public async Task<IActionResult> Edit(int id, PresenterDto presenter)
         {
-            if (_context.Presenters.FirstOrDefault(x => x.Id == presenter.Id) == null)
-            {
-                return NotFound();
-            }
+           
             
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(presenter);
+                    presenter.Id = id;
+                    var presenterToUpdate = _mapper.Map<PresenterDto, Presenter>(presenter);
+                    _context.Update(presenterToUpdate);
                     await _context.SaveChangesAsync();
                     return Ok(presenter);
                 }
@@ -131,16 +123,19 @@ namespace Grade.Controllers
                 }
             }
 
-            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+            return Conflict();
         }
 
 
         // POST: Presenters/Delete/5
-        [HttpDelete("{id}")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete([FromRoute] int id)
+        [IgnoreAntiforgeryToken]
+        [HttpDelete]
+        public async Task<IActionResult> Delete(int id)
         {
+           
+
             var presenter = await _context.Presenters.FindAsync(id);
+            
             if(presenter == null)
             {
                 return NotFound();
@@ -160,7 +155,7 @@ namespace Grade.Controllers
                 
             }
 
-            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+            return Conflict();
         }
 
         private bool PresenterExists(int id)
