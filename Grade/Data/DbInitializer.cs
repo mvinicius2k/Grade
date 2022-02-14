@@ -28,7 +28,7 @@ namespace Grade.Data
 
             
             var logger =  loggerFactory.CreateLogger<GradeContext>();
-            if (InsertDataTest && !context.ProgramsBase.Any())
+            if (InsertDataTest && !context.Sections.Any())
             {
                 
                 logger.LogInformation("DB vazio, inserindo valores teste");
@@ -105,7 +105,7 @@ namespace Grade.Data
                     ((IResolveTypesPgsql)program).ResolveTypesPgsql();
 
                 logger.LogInformation(program.ToString());
-                context.ProgramsBase.Add(program);
+                context.Sections.Add(program);
 
             }
 
@@ -116,17 +116,17 @@ namespace Grade.Data
                 new Apresentation
                 {
                     PresenterId = context.Presenters.First(x => x.Name == "Valdenir Rodrigues").Id,
-                    SectionId = context.ProgramsBase.First(x => x.Name == "Asa Branca Esporte Clube").Id,
+                    SectionId = context.Sections.First(x => x.Name == "Asa Branca Esporte Clube").Id,
                 },
                 new Apresentation
                 {
                     PresenterId = context.Presenters.First(x => x.Name == "Playlist").Id,
-                    SectionId = context.ProgramsBase.First(x => x.Name == "Tarde Show").Id,
+                    SectionId = context.Sections.First(x => x.Name == "Tarde Show").Id,
                 },
                 new Apresentation
                 {
                     PresenterId = context.Presenters.First(x => x.Name == "Equipe Esportiva").Id,
-                    SectionId = context.ProgramsBase.First(x => x.Name == "Jornada Esportiva").Id,
+                    SectionId = context.Sections.First(x => x.Name == "Jornada Esportiva").Id,
                 }
             };
 

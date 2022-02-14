@@ -16,9 +16,9 @@ namespace Grade.Data
 
         public DbSet<Presenter> Presenters { get; set; }
         public DbSet<Apresentation> Apresentations { get; set; }
-        public DbSet<Section> ProgramsBase { get; set; }
-        public DbSet<WeeklySection> WeeklyPrograms { get; set; }
-        public DbSet<LooseSection> LoosePrograms { get; set; }
+        public DbSet<Section> Sections { get; set; }
+        public DbSet<WeeklySection> WeeklySections { get; set; }
+        public DbSet<LooseSection> LooseSections { get; set; }
         public DbSet<Resource> Resources { get; set; }
 
         protected override void OnModelCreating(ModelBuilder mb)

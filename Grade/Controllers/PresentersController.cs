@@ -29,37 +29,65 @@ namespace Grade.Controllers
             _mapper = mapper;
         }
 
+        
+        [HttpGet]
+        [Route("getAll")]
+        public async Task <IActionResult> GetAll(string sortOrder = null)
+        {
+
+            var presenters = _context.Presenters;
+
+
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    return Ok(presenters.OrderByDescending(x => x.Name).ToList());
+                default:
+                    return Ok(presenters.OrderBy(x => x.Name).ToList());
+
+
+            }
+
+        }
 
         // GET: Presenters/Details/5
-        [HttpGet("{id}")]
-        public async Task<IActionResult> Get([FromRoute] int id)
+        [HttpGet("details/")]
+        public async Task<IActionResult> Details(int id)
         {
-            
+
 
             var presenter = await _context.Presenters
                 .Include(x => x.Apresentations)
                 .ThenInclude(x => x.Section)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (presenter == null)
             {
                 return NotFound();
             }
 
+            PresenterDetailsDto presenterDto = ToPresenterDetailsDto(presenter);
+
+            return Ok(presenterDto);
+        }
+
+        
+        private PresenterDetailsDto ToPresenterDetailsDto(Presenter presenter)
+        {
             var presenterDto = _mapper.Map<Presenter, PresenterDetailsDto>(presenter);
 
             presenterDto.Sections = new SectionDto[presenter.Apresentations.Count];
             var i = 0;
             foreach (var apresentation in presenter.Apresentations)
             {
-                if(apresentation.Section is WeeklySection)
+                if (apresentation.Section is WeeklySection)
                     presenterDto.Sections[i++] = _mapper.Map<WeeklySection, WeeklySectionDetailsDto>(apresentation.Section as WeeklySection);
                 else if (apresentation.Section is LooseSection)
                     presenterDto.Sections[i++] = _mapper.Map<LooseSection, LooseSectionDetailsDto>(apresentation.Section as LooseSection);
             }
-            
-            
-            return Ok(presenterDto);
+
+            return presenterDto;
         }
 
 
@@ -68,6 +96,7 @@ namespace Grade.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [IgnoreAntiforgeryToken]
+        [Route("create")]
         public async Task<IActionResult> Create([FromBody] PresenterDto presenter)
         {
             try
@@ -102,6 +131,7 @@ namespace Grade.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPut]
         [IgnoreAntiforgeryToken]
+        [Route("edit")]
         public async Task<IActionResult> Edit(int id, PresenterDto presenter)
         {
            
@@ -130,6 +160,7 @@ namespace Grade.Controllers
         // POST: Presenters/Delete/5
         [IgnoreAntiforgeryToken]
         [HttpDelete]
+        [Route("delete")]
         public async Task<IActionResult> Delete(int id)
         {
            
@@ -158,9 +189,5 @@ namespace Grade.Controllers
             return Conflict();
         }
 
-        private bool PresenterExists(int id)
-        {
-            return _context.Presenters.Any(e => e.Id == id);
-        }
     }
 }
