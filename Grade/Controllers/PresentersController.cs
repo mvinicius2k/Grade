@@ -69,6 +69,7 @@ namespace Grade.Controllers
 
             //var presenterDto = PresenterDetailsDto.FromPresenter(presenter, _mapper);
             var presenterDto = _mapper.Map<PresenterDetailsDto>(presenter);
+            presenterDto.Sections = _mapper.Map<SectionDto[]>(presenter.Apresentations);
 
             return Ok(presenterDto);
         }

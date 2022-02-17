@@ -64,58 +64,29 @@ var mapperConfig = new AutoMapper.MapperConfiguration(cfg =>
        .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id));
 
     cfg.CreateMap<Presenter, PresenterDetailsDto>()
-        .ForMember(dest => dest.ImageResource, opt => opt.MapFrom(src => src.Resource))
-        .Include<Apresentation, SectionDto>()
-        .ForMember(dest => dest.Sections, opt => opt.MapFrom(src => src.Apresentations))
-        .AfterMap((presenter, dto, context) =>
-        {
-            ////dto.Sections = new SectionDto[presenter.Apresentations.Count];
-            //dto.Sections = new SectionDto[presenter.Apresentations.Count];
-            //var i = 0;
-
-            //foreach (var apresentation in presenter.Apresentations)
-            //{
-            //    if (apresentation != null)
-            //    {
-            //        if (apresentation.Section is WeeklySection)
-            //            dto.Sections[i++] = context.Mapper
-            //                .Map<WeeklySection, WeeklySectionDetailsDto>((WeeklySection)apresentation.Section);
-            //        else if (apresentation.Section is LooseSection)
-            //            dto.Sections[i++] = context.Mapper
-            //                .Map<LooseSection, LooseSectionDetailsDto>((LooseSection)apresentation.Section);
-            //    }
-
-
-            //}
-        });
-
-
-
-
-    
+        .ForMember(dest => dest.ImageResource, opt => opt.MapFrom(src => src.Resource));
+        
 
     cfg.CreateMap<Section, WeeklySectionDetailsDto>()
         .ForMember(dest => dest.ImageResource, opt => opt.MapFrom(src => src.Resource));
 
-
-
     cfg.CreateMap<Section, LooseSectionDetailsDto>()
         .ForMember(dest => dest.ImageResource, opt => opt.MapFrom(src => src.Resource));
 
-    
+    cfg.CreateMap<Apresentation, SectionDto>()
+    .ConvertUsing((apresentation, _, context) =>
+    {
+        return context.Mapper.Map<Section, SectionDto>(apresentation.Section);
+        
 
+    });
 
-    cfg.CreateMap<Apresentation, WeeklySectionDetailsDto>()
-        .AfterMap((apresentation, dto, context) =>
-        {
-            dto = context.Mapper.Map<WeeklySectionDetailsDto>(apresentation.Section as WeeklySection);
-        });
+    cfg.CreateMap<Section, SectionDto>();
+    cfg.CreateMap<WeeklySection, WeeklySectionDetailsDto>()
+        .IncludeBase<Section, SectionDto>();
+    cfg.CreateMap<LooseSection, LooseSectionDetailsDto>()
+       .IncludeBase<Section, SectionDto>();
 
-    cfg.CreateMap<Apresentation, LooseSectionDetailsDto>()
-        .AfterMap((apresentation, dto, context) =>
-        {
-            dto = context.Mapper.Map<LooseSectionDetailsDto>(apresentation.Section as LooseSection);
-        });
 
 });
 builder.Services.AddSingleton(mapperConfig.CreateMapper());

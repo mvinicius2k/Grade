@@ -1,5 +1,6 @@
 ﻿namespace Grade.Models
 {
+    [Serializable]
     public class WeeklySection : Section
     {
         public TimeOnly StartAt { get; set; }
