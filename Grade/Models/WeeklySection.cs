@@ -7,6 +7,6 @@
         public DayOfWeek StartDay{ get; set; }
         public DayOfWeek EndDay { get; set; }
         
-
+        
     }
 }

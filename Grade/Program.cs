@@ -1,5 +1,6 @@
 using Grade;
 using Grade.Controllers;
+using Grade.Converters;
 using Grade.Data;
 using Grade.Models;
 using Grade.Models.Dto;
@@ -12,6 +13,7 @@ using System.Text.Json.Serialization;
 const string ConnectionKey = "PostgresConnection";
 const string SwaggerVersion = "v1";
 const string SwaggerTitle = "API da Grade de Programação.";
+const string TimeOnlyConverterPattern = "HH:mm";
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,6 +36,7 @@ builder.Services.AddControllers().AddJsonOptions(options => {
     options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
     options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    options.JsonSerializerOptions.Converters.Add(new TimeOnlyConverter(TimeOnlyConverterPattern));
     
 }); 
 
@@ -61,17 +64,60 @@ var mapperConfig = new AutoMapper.MapperConfiguration(cfg =>
        .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id));
 
     cfg.CreateMap<Presenter, PresenterDetailsDto>()
+        .ForMember(dest => dest.ImageResource, opt => opt.MapFrom(src => src.Resource))
+        .Include<Apresentation, SectionDto>()
+        .ForMember(dest => dest.Sections, opt => opt.MapFrom(src => src.Apresentations))
+        .AfterMap((presenter, dto, context) =>
+        {
+            ////dto.Sections = new SectionDto[presenter.Apresentations.Count];
+            //dto.Sections = new SectionDto[presenter.Apresentations.Count];
+            //var i = 0;
+
+            //foreach (var apresentation in presenter.Apresentations)
+            //{
+            //    if (apresentation != null)
+            //    {
+            //        if (apresentation.Section is WeeklySection)
+            //            dto.Sections[i++] = context.Mapper
+            //                .Map<WeeklySection, WeeklySectionDetailsDto>((WeeklySection)apresentation.Section);
+            //        else if (apresentation.Section is LooseSection)
+            //            dto.Sections[i++] = context.Mapper
+            //                .Map<LooseSection, LooseSectionDetailsDto>((LooseSection)apresentation.Section);
+            //    }
+
+
+            //}
+        });
+
+
+
+
+    
+
+    cfg.CreateMap<Section, WeeklySectionDetailsDto>()
         .ForMember(dest => dest.ImageResource, opt => opt.MapFrom(src => src.Resource));
 
-    cfg.CreateMap<WeeklySection, WeeklySectionDetailsDto>()
+
+
+    cfg.CreateMap<Section, LooseSectionDetailsDto>()
         .ForMember(dest => dest.ImageResource, opt => opt.MapFrom(src => src.Resource));
 
-    cfg.CreateMap<LooseSection, LooseSectionDetailsDto>()
-        .ForMember(dest => dest.ImageResource, opt => opt.MapFrom(src => src.Resource));
+    
 
+
+    cfg.CreateMap<Apresentation, WeeklySectionDetailsDto>()
+        .AfterMap((apresentation, dto, context) =>
+        {
+            dto = context.Mapper.Map<WeeklySectionDetailsDto>(apresentation.Section as WeeklySection);
+        });
+
+    cfg.CreateMap<Apresentation, LooseSectionDetailsDto>()
+        .AfterMap((apresentation, dto, context) =>
+        {
+            dto = context.Mapper.Map<LooseSectionDetailsDto>(apresentation.Section as LooseSection);
+        });
 
 });
-
 builder.Services.AddSingleton(mapperConfig.CreateMapper());
 
 var app = builder.Build();

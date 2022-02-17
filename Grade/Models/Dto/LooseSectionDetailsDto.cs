@@ -2,7 +2,8 @@
 {
     public class LooseSectionDetailsDto : LooseSectionDto
     {
-        public PresenterDto Presenter { get; set; }
+        public PresenterDto[] Presenters { get; set; }
         public ResourceDetailsDto ImageResource { get; set; }
+        
     }
 }

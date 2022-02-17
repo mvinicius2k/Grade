@@ -25,7 +25,10 @@ namespace Grade.Data
         {
             
             mb.Entity<Resource>().ToTable(nameof(Resource));
-            mb.Entity<Section>().ToTable(nameof(Section));
+            mb.Entity<Section>().ToTable(nameof(Section))
+                .HasMany(x => x.Apresentations)
+                .WithOne(x => x.Section)
+                .OnDelete(DeleteBehavior.Cascade);
             mb.Entity<LooseSection>().ToTable(nameof(LooseSection));
             mb.Entity<WeeklySection>().ToTable(nameof(WeeklySection));
             mb.Entity<Apresentation>().ToTable(nameof(Apresentation));

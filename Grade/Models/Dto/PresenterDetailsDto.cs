@@ -1,4 +1,6 @@
-﻿using System.Text.Json.Serialization;
+﻿using AutoMapper;
+using Grade.Data;
+using System.Text.Json.Serialization;
 
 namespace Grade.Models.Dto
 {
@@ -8,5 +10,7 @@ namespace Grade.Models.Dto
         public int PresenterId => base.Id;
         public ResourceDetailsDto ImageResource { get; set; }
         public SectionDto[] Sections { get; set; }
+
+       
     }
 }
