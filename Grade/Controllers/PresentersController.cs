@@ -75,22 +75,7 @@ namespace Grade.Controllers
         }
 
         
-        //private PresenterDetailsDto ToPresenterDetailsDto(Presenter presenter)
-        //{
-        //    var presenterDto = _mapper.Map<Presenter, PresenterDetailsDto>(presenter);
-
-        //    presenterDto.Sections = new SectionDto[presenter.Apresentations.Count];
-        //    var i = 0;
-        //    foreach (var apresentation in presenter.Apresentations)
-        //    {
-        //        if (apresentation.Section is WeeklySection)
-        //            presenterDto.Sections[i++] = _mapper.Map<WeeklySection, WeeklySectionDetailsDto>(apresentation.Section as WeeklySection);
-        //        else if (apresentation.Section is LooseSection)
-        //            presenterDto.Sections[i++] = _mapper.Map<LooseSection, LooseSectionDetailsDto>(apresentation.Section as LooseSection);
-        //    }
-
-        //    return presenterDto;
-        //}
+       
 
 
         // POST: Presenters/Create

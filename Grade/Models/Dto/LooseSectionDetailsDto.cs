@@ -4,6 +4,7 @@
     {
         public PresenterDto[] Presenters { get; set; }
         public ResourceDetailsDto ImageResource { get; set; }
-        
+        public string SectionType => nameof(LooseSection);
+
     }
 }

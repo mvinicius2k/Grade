@@ -37,6 +37,8 @@ builder.Services.AddControllers().AddJsonOptions(options => {
     options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     options.JsonSerializerOptions.Converters.Add(new TimeOnlyConverter(TimeOnlyConverterPattern));
+    options.JsonSerializerOptions.Converters.Add(new SectionDtoJsonConverter());
+
     
 }); 
 
@@ -68,17 +70,25 @@ var mapperConfig = new AutoMapper.MapperConfiguration(cfg =>
         
 
     cfg.CreateMap<Section, WeeklySectionDetailsDto>()
-        .ForMember(dest => dest.ImageResource, opt => opt.MapFrom(src => src.Resource));
+        .ForMember(dest => dest.ImageResource, opt => opt.MapFrom(src => src.Resource))
+        .ForMember(dest => dest.Presenters, opt => opt.MapFrom(src => src.Apresentations));
 
     cfg.CreateMap<Section, LooseSectionDetailsDto>()
-        .ForMember(dest => dest.ImageResource, opt => opt.MapFrom(src => src.Resource));
+        .ForMember(dest => dest.ImageResource, opt => opt.MapFrom(src => src.Resource))
+        .ForMember(dest => dest.Presenters, opt => opt.MapFrom(src => src.Apresentations));
 
     cfg.CreateMap<Apresentation, SectionDto>()
     .ConvertUsing((apresentation, _, context) =>
     {
         return context.Mapper.Map<Section, SectionDto>(apresentation.Section);
-        
 
+
+    });
+
+    cfg.CreateMap<Apresentation, PresenterDto>()
+    .ConvertUsing((apresentation, _, context) =>
+    {
+        return context.Mapper.Map<Presenter, PresenterDto>(apresentation.Presenter);
     });
 
     cfg.CreateMap<Section, SectionDto>();

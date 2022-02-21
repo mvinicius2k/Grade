@@ -30,7 +30,10 @@ namespace Grade.Data
                 .WithOne(x => x.Section)
                 .OnDelete(DeleteBehavior.Cascade);
             mb.Entity<LooseSection>().ToTable(nameof(LooseSection));
-            mb.Entity<WeeklySection>().ToTable(nameof(WeeklySection));
+            mb.Entity<WeeklySection>().ToTable(nameof(WeeklySection))
+                .HasMany(x => x.Apresentations)
+                .WithOne(x => x.Section as WeeklySection)
+                .OnDelete(DeleteBehavior.Cascade); ;
             mb.Entity<Apresentation>().ToTable(nameof(Apresentation));
             mb.Entity<Presenter>().ToTable(nameof(Presenter))
                 .HasMany(x => x.Apresentations)

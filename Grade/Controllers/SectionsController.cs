@@ -11,13 +11,13 @@ using System.Linq.Expressions;
 namespace Grade.Controllers
 {
     [ApiController][Route("[controller]")]
-    public class SectionController : Controller
+    public class SectionsController : Controller
     {
         private readonly GradeContext _context;
         private readonly ILogger _logger;
         private readonly IMapper _mapper;
 
-        public SectionController(GradeContext context, ILogger<SectionController> logger, IMapper mapper)
+        public SectionsController(GradeContext context, ILogger<SectionsController> logger, IMapper mapper)
         {
             _context = context;
             _logger = logger;
@@ -26,7 +26,7 @@ namespace Grade.Controllers
 
         [HttpGet]
         [Route("getAll")]
-        public async Task<IActionResult> GetAllWithDetails(string sortOrder = null, bool includeInactive = false)
+        public async Task<IActionResult> GetAllWithDetails(string? sortOrder = null, bool includeInactive = false)
         {
             var weeklySections = await _context.WeeklySections
                     .Where(x => x.Active || includeInactive)
@@ -55,7 +55,8 @@ namespace Grade.Controllers
             {
                 case "time":
                     sections.Weekly.AddRange(
-                        weeklySections.OrderBy(x => x.StartDay)
+                        weeklySections
+                        .OrderBy(x => x.StartDay)
                         .ThenBy(x => x.StartAt));
                     sections.Loose.AddRange(
                         looseSections.OrderBy(x => x.StartAt));
@@ -70,6 +71,35 @@ namespace Grade.Controllers
 
             }
             return Ok(sections);
+
+        }
+        [HttpGet]
+        [Route("details")]
+        public async Task<IActionResult> Details([FromQuery] int id)
+        {
+            var section = await _context.Sections
+                .Include(x => x.Apresentations)
+                .ThenInclude(x => x.Presenter)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == id);
+            
+            if (section is null)
+                return NotFound();
+
+            if(section is WeeklySection)
+            {
+                var dto =_mapper.Map<WeeklySectionDetailsDto>(section);
+                dto.Presenters = _mapper.Map<PresenterDto[]>(section.Apresentations);
+                return Ok(dto);
+            }
+
+            else
+            {
+                var dto = _mapper.Map<LooseSectionDetailsDto>(section);
+                dto.Presenters = _mapper.Map<PresenterDto[]>(section.Apresentations);
+                return Ok(dto);
+
+            }
 
         }
 
@@ -121,15 +151,7 @@ namespace Grade.Controllers
 
         }*/
 
-        // GET: SectionController/Details/5
-        [HttpGet]
-        [Route("details")]
-        public ActionResult Details(int id)
-        {
-            return View();
-        }
-
-
+       
         // POST: SectionController/Create
         [HttpPost]
         [Route("create")]
