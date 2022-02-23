@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 
 namespace Grade.Converters
 {
-    public class SectionDtoJsonConverter : JsonConverter<SectionDto>
+    public class SectionDtoConverter : JsonConverter<SectionDto>
     {
         
 

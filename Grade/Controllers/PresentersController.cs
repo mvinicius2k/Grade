@@ -119,7 +119,7 @@ namespace Grade.Controllers
         [HttpPut]
         [IgnoreAntiforgeryToken]
         [Route("edit")]
-        public async Task<IActionResult> Edit(int id, PresenterDto presenter)
+        public async Task<IActionResult> Edit(int id,[FromBody] PresenterDto presenter)
         {
            
             

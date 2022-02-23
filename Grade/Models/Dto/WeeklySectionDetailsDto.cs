@@ -6,7 +6,9 @@ namespace Grade.Models.Dto
     [Serializable]
     public class WeeklySectionDetailsDto : WeeklySectionDto
     {
-        public PresenterDto[] Presenters { get; set; }
+        [JsonPropertyName("id")]
+        public int SectionId => base.Id;
+        public PresenterDetailsDto[] Presenters { get; set; }
         public ResourceDetailsDto ImageResource { get; set; }
         public string SectionType => nameof(WeeklySection);
     }

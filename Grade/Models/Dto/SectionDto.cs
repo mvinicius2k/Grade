@@ -4,7 +4,7 @@ namespace Grade.Models.Dto
 {
     public abstract class SectionDto
     {
-        public int Id { get; set; }
+        internal int Id { get; set; }
 
         [Required]
         [MaxLength(100)]
@@ -15,7 +15,7 @@ namespace Grade.Models.Dto
         public bool Active { get; set; }
 
         public int? ImageId { get; set; }
-
+        public int[] PresentersId { get; set; }
         
     }
 }

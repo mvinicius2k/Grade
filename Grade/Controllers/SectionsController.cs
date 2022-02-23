@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Grade.Data;
+using Grade.Helpers;
 using Grade.Models;
 using Grade.Models.Dto;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
@@ -33,7 +34,6 @@ namespace Grade.Controllers
                     .Include(x => x.Apresentations)
                     .ThenInclude(x => x.Presenter)
                     .AsNoTracking()
-                    .Select(x => _mapper.Map<WeeklySectionDetailsDto>(x))
                     .ToListAsync();
 
             var looseSections = await _context.LooseSections
@@ -41,36 +41,53 @@ namespace Grade.Controllers
                 .Include(x => x.Apresentations)
                 .ThenInclude(x => x.Presenter)
                 .AsNoTracking()
-                .Select(x => _mapper.Map<LooseSectionDetailsDto>(x))
                 .ToListAsync();
 
 
-            var sections = new
+
+            var weeklyDto = new List<WeeklySectionDetailsDto>(weeklySections.Count);
+            var looseDto = new List<LooseSectionDetailsDto>(looseSections.Count);
+
+            foreach (var weeklySection in weeklySections)
+            {
+                var dto = _mapper.Map<WeeklySectionDetailsDto>(weeklySection);
+                dto.Presenters = _mapper.Map<PresenterDetailsDto[]>(weeklySection.Apresentations);
+                weeklyDto.Add(dto);
+            }
+            foreach (var looseSection in looseSections)
+            {
+                var dto = _mapper.Map<LooseSectionDetailsDto>(looseSection);
+                dto.Presenters = _mapper.Map<PresenterDetailsDto[]>(looseSection.Apresentations);
+                looseDto.Add(dto);
+            }
+
+            var sectionsDto = new
             {
                 Weekly = new List<WeeklySectionDetailsDto>(weeklySections.Count),
                 Loose = new List<LooseSectionDetailsDto>(looseSections.Count)
             };
 
+            
+
             switch (sortOrder)
             {
                 case "time":
-                    sections.Weekly.AddRange(
-                        weeklySections
+                    sectionsDto.Weekly.AddRange(weeklyDto
                         .OrderBy(x => x.StartDay)
                         .ThenBy(x => x.StartAt));
-                    sections.Loose.AddRange(
-                        looseSections.OrderBy(x => x.StartAt));
+                    sectionsDto.Loose.AddRange(looseDto
+                        .OrderBy(x => x.StartAt));
                     break;
 
                 default:
-                    sections.Weekly.AddRange(
-                        weeklySections.OrderBy(x => x.Name));
-                    sections.Loose.AddRange(
-                        looseSections.OrderBy(x => x.Name));
+                    sectionsDto.Weekly.AddRange(
+                        weeklyDto.OrderBy(x => x.Name));
+                    sectionsDto.Loose.AddRange(
+                        looseDto.OrderBy(x => x.Name));
                     break;
 
             }
-            return Ok(sections);
+            return Ok(sectionsDto);
 
         }
         [HttpGet]
@@ -89,113 +106,152 @@ namespace Grade.Controllers
             if(section is WeeklySection)
             {
                 var dto =_mapper.Map<WeeklySectionDetailsDto>(section);
-                dto.Presenters = _mapper.Map<PresenterDto[]>(section.Apresentations);
+                dto.Presenters = _mapper.Map<PresenterDetailsDto[]>(section.Apresentations);
                 return Ok(dto);
             }
 
             else
             {
                 var dto = _mapper.Map<LooseSectionDetailsDto>(section);
-                dto.Presenters = _mapper.Map<PresenterDto[]>(section.Apresentations);
+                dto.Presenters = _mapper.Map<PresenterDetailsDto[]>(section.Apresentations);
                 return Ok(dto);
 
             }
 
         }
 
-        
-
-        /*[HttpGet]
-        [Route("getAll")]
-        public async Task<IActionResult> GetAll(string sortOrder = null, bool includeInactive = false)
-        {
-
-            
-            var weeklySections = _context.WeeklySections.Where(x => x.Active || includeInactive);
-            var looseSections = _context.LooseSections.Where(x => x.Active || includeInactive);
-           
 
 
-        
-            var sections = new
-            {
-                Weekly = new List<WeeklySection>(weeklySections.Count()),
-                Loose = new List<LooseSection>(looseSections.Count())
-            };
-            switch (sortOrder)
-            {
-                case "time":
-                    sections.Weekly.AddRange(
-                        weeklySections.OrderBy(x => x.StartDay)
-                        .ThenBy(x => x.StartAt)
-                        .ToList());
-                    sections.Loose.AddRange(
-                        looseSections.OrderBy(x => x.StartAt)
-                        .ToList());
-                    break;
 
-                default:
-                    sections.Weekly.AddRange(
-                        weeklySections.OrderBy(x => x.Name)
-                        .ToList());
-                    sections.Loose.AddRange(
-                        looseSections.OrderBy(x => x.Name)
-                        .ToList());
-                    break;
-
-            }
-
-            
-
-            return Ok(sections);
-
-        }*/
-
-       
-        // POST: SectionController/Create
         [HttpPost]
-        [Route("create")]
-        public ActionResult Create(IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
-
-        // POST: SectionController/Edit/5
-        [HttpPut]
-        [Route("edit")]
-        public ActionResult Edit(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
+        [Route("createWeeklySection")]
+        [IgnoreAntiforgeryToken]
+        public async Task<IActionResult> CreateWeeklySection([FromBody] WeeklySectionDto section) => 
+            await Create(section);
         
+        [HttpPost]
+        [Route("createLooseSection")]
+        [IgnoreAntiforgeryToken]
+        public async Task<IActionResult> CreateLooseSection([FromBody] LooseSectionDto section) => 
+            await Create(section);
+
+        [HttpPut]
+        [Route("editWeeklySection")]
+        [IgnoreAntiforgeryToken]
+        public async Task<IActionResult> EditWeeklySection(int id, [FromBody] WeeklySectionDto section) =>
+            await Edit(id,section);
+
+        [HttpPut]
+        [Route("editLooseSection")]
+        [IgnoreAntiforgeryToken]
+        public async Task<IActionResult> EditLooseSection(int id, [FromBody] LooseSectionDto section) =>
+            await Edit(id, section);
+
         [HttpDelete]
         [Route("delete")]
-        public ActionResult Delete(int id, IFormCollection collection)
+        [IgnoreAntiforgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var section = await _context.Sections.FindAsync(id);
+
+            if (section == null)
+            {
+                return NotFound();
+            }
+
+            try
+            {
+                _context.Sections.Remove(section);
+                await _context.SaveChangesAsync();
+                return Ok();
+
+            }
+            catch (DbUpdateException ex)
+            {
+                _logger.LogError($"Erro ao deletar. {ex.Message}");
+                ModelState.AddModelError(string.Empty, $"{StringUtils.DefaultFatalError}. {ex.Message}");
+
+            }
+
+            return Conflict();
+        }
+
+        private async Task<IActionResult> Create<T> (T section) where T : SectionDto
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                if (ModelState.IsValid)
+                {
+                    if(section is WeeklySection)
+                    {
+                        var sectionToAdd = _mapper.Map<WeeklySection>(section);
+                        _context.Add(sectionToAdd);
+
+                    } else
+                    {
+                        var sectionToAdd = _mapper.Map<LooseSection>(section);
+                        _context.Add(sectionToAdd);
+                    }
+
+
+
+                    await _context.SaveChangesAsync();
+
+                    return Ok(section);
+                }
             }
-            catch
+            catch (DbUpdateException ex)
             {
-                return View();
+                ModelState.AddModelError(string.Empty, StringUtils.DefaultFatalError);
+                _logger.LogError($"Não foi possível adicionar: {ex.Message}", ex);
             }
+
+            return Conflict();
         }
+
+        public async Task<IActionResult> Edit<T>(int id, T section) where T : SectionDto
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    section.Id = id;
+
+                    if(section is WeeklySectionDto)
+                    {
+                        var sectionToUpdate = _mapper.Map<WeeklySection>(section);
+                        _context.Update(sectionToUpdate);
+
+                    } 
+                    else
+                    {
+                        var sectionToUpdate = _mapper.Map<LooseSection>(section);
+                        _context.Update(sectionToUpdate);
+                    }
+
+                    await _context.SaveChangesAsync();
+                    return Ok(section);
+                }
+                catch (DbUpdateConcurrencyException ex)
+                {
+                    ModelState.AddModelError(string.Empty, $"Erro de concorrência. ${StringUtils.DefaultFatalError}. {ex.Message}");
+                    _logger.LogError($"Não foi possível editar: {ex.Message}", ex);
+                } catch(DbUpdateException ex)
+                {
+                    ModelState.AddModelError(string.Empty, StringUtils.DefaultFatalError);
+                    _logger.LogError($"Não foi possível editar: {ex.Message}", ex);
+                }
+
+            }
+
+            return Conflict();
+        }
+
+       
+
+
+       
+
+
     }
 }

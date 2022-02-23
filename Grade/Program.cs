@@ -34,10 +34,11 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter(); //Exibir erros
 
 builder.Services.AddControllers().AddJsonOptions(options => {
     options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
-    options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+    //options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     options.JsonSerializerOptions.Converters.Add(new TimeOnlyConverter(TimeOnlyConverterPattern));
-    options.JsonSerializerOptions.Converters.Add(new SectionDtoJsonConverter());
+    options.JsonSerializerOptions.Converters.Add(new SectionDtoConverter());
+    
 
     
 }); 
@@ -63,14 +64,16 @@ var mapperConfig = new AutoMapper.MapperConfiguration(cfg =>
 {
     cfg.CreateMap<PresenterDto, Presenter>()
        .ForMember(dest => dest.ResourceId, opt => opt.MapFrom(src => src.ImageId))
-       .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id));
+       .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+       .ReverseMap();
 
     cfg.CreateMap<Presenter, PresenterDetailsDto>()
         .ForMember(dest => dest.ImageResource, opt => opt.MapFrom(src => src.Resource));
-        
+
 
     cfg.CreateMap<Section, WeeklySectionDetailsDto>()
         .ForMember(dest => dest.ImageResource, opt => opt.MapFrom(src => src.Resource))
+        .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
         .ForMember(dest => dest.Presenters, opt => opt.MapFrom(src => src.Apresentations));
 
     cfg.CreateMap<Section, LooseSectionDetailsDto>()
@@ -85,18 +88,24 @@ var mapperConfig = new AutoMapper.MapperConfiguration(cfg =>
 
     });
 
-    cfg.CreateMap<Apresentation, PresenterDto>()
+    cfg.CreateMap<Apresentation, PresenterDetailsDto>()
     .ConvertUsing((apresentation, _, context) =>
     {
-        return context.Mapper.Map<Presenter, PresenterDto>(apresentation.Presenter);
+        return context.Mapper.Map<Presenter, PresenterDetailsDto>(apresentation.Presenter);
     });
 
-    cfg.CreateMap<Section, SectionDto>();
+
+    cfg.CreateMap<Section, SectionDto>()
+        .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id));
     cfg.CreateMap<WeeklySection, WeeklySectionDetailsDto>()
         .IncludeBase<Section, SectionDto>();
     cfg.CreateMap<LooseSection, LooseSectionDetailsDto>()
        .IncludeBase<Section, SectionDto>();
 
+    cfg.CreateMap<WeeklySectionDto, WeeklySection>()
+        .ForMember(dest => dest.StartAt, opt => opt.MapFrom(src => TimeOnly.Parse(src.StartAt)))
+        .ForMember(dest => dest.EndAt, opt => opt.MapFrom(src => TimeOnly.Parse(src.EndAt)));
+    cfg.CreateMap<LooseSectionDto, LooseSection>();
 
 });
 builder.Services.AddSingleton(mapperConfig.CreateMapper());
