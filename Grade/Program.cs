@@ -62,6 +62,7 @@ builder.Services.AddAntiforgery(options =>
 
 var mapperConfig = new AutoMapper.MapperConfiguration(cfg =>
 {
+
     cfg.CreateMap<PresenterDto, Presenter>()
        .ForMember(dest => dest.ResourceId, opt => opt.MapFrom(src => src.ImageId))
        .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
@@ -70,7 +71,8 @@ var mapperConfig = new AutoMapper.MapperConfiguration(cfg =>
     cfg.CreateMap<Presenter, PresenterDetailsDto>()
         .ForMember(dest => dest.ImageResource, opt => opt.MapFrom(src => src.Resource));
 
-
+    /*
+     */
     cfg.CreateMap<Section, WeeklySectionDetailsDto>()
         .ForMember(dest => dest.ImageResource, opt => opt.MapFrom(src => src.Resource))
         .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
@@ -80,6 +82,9 @@ var mapperConfig = new AutoMapper.MapperConfiguration(cfg =>
         .ForMember(dest => dest.ImageResource, opt => opt.MapFrom(src => src.Resource))
         .ForMember(dest => dest.Presenters, opt => opt.MapFrom(src => src.Apresentations));
 
+    /*
+     * Extrai um SectionDto de um Apresentation
+     */
     cfg.CreateMap<Apresentation, SectionDto>()
     .ConvertUsing((apresentation, _, context) =>
     {
@@ -88,11 +93,15 @@ var mapperConfig = new AutoMapper.MapperConfiguration(cfg =>
 
     });
 
+    /*
+     * Extrai um PresenterDetailsDto de um Apresentation
+     */
     cfg.CreateMap<Apresentation, PresenterDetailsDto>()
     .ConvertUsing((apresentation, _, context) =>
     {
         return context.Mapper.Map<Presenter, PresenterDetailsDto>(apresentation.Presenter);
     });
+
 
 
     cfg.CreateMap<Section, SectionDto>()
@@ -102,10 +111,14 @@ var mapperConfig = new AutoMapper.MapperConfiguration(cfg =>
     cfg.CreateMap<LooseSection, LooseSectionDetailsDto>()
        .IncludeBase<Section, SectionDto>();
 
+
     cfg.CreateMap<WeeklySectionDto, WeeklySection>()
+        .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
         .ForMember(dest => dest.StartAt, opt => opt.MapFrom(src => TimeOnly.Parse(src.StartAt)))
         .ForMember(dest => dest.EndAt, opt => opt.MapFrom(src => TimeOnly.Parse(src.EndAt)));
-    cfg.CreateMap<LooseSectionDto, LooseSection>();
+
+    cfg.CreateMap<LooseSectionDto, LooseSection>()
+        .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id));
 
 });
 builder.Services.AddSingleton(mapperConfig.CreateMapper());

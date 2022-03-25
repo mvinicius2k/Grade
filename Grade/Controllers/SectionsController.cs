@@ -14,6 +14,10 @@ namespace Grade.Controllers
     [ApiController][Route("[controller]")]
     public class SectionsController : Controller
     {
+        private const string CreateWeeklyActionRoute = $"{Constants.CreateActionRoute}WeeklySection";
+        private const string CreateLooseActionRoute = $"{Constants.CreateActionRoute}LooseSection";
+        private const string EditWeeklyActionRoute = $"{Constants.EditActionRoute}WeeklySection";
+        private const string EditLooseActionRoute = $"{Constants.EditActionRoute}LooseSection";
         private readonly GradeContext _context;
         private readonly ILogger _logger;
         private readonly IMapper _mapper;
@@ -124,31 +128,31 @@ namespace Grade.Controllers
 
 
         [HttpPost]
-        [Route("createWeeklySection")]
+        [Route(CreateWeeklyActionRoute)]
         [IgnoreAntiforgeryToken]
         public async Task<IActionResult> CreateWeeklySection([FromBody] WeeklySectionDto section) => 
             await Create(section);
         
         [HttpPost]
-        [Route("createLooseSection")]
+        [Route(CreateLooseActionRoute)]
         [IgnoreAntiforgeryToken]
         public async Task<IActionResult> CreateLooseSection([FromBody] LooseSectionDto section) => 
             await Create(section);
 
         [HttpPut]
-        [Route("editWeeklySection")]
+        [Route(EditWeeklyActionRoute)]
         [IgnoreAntiforgeryToken]
         public async Task<IActionResult> EditWeeklySection(int id, [FromBody] WeeklySectionDto section) =>
             await Edit(id,section);
 
         [HttpPut]
-        [Route("editLooseSection")]
+        [Route(EditLooseActionRoute)]
         [IgnoreAntiforgeryToken]
         public async Task<IActionResult> EditLooseSection(int id, [FromBody] LooseSectionDto section) =>
             await Edit(id, section);
 
         [HttpDelete]
-        [Route("delete")]
+        [Route(Constants.DeleteActionRoute)]
         [IgnoreAntiforgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
@@ -169,7 +173,7 @@ namespace Grade.Controllers
             catch (DbUpdateException ex)
             {
                 _logger.LogError($"Erro ao deletar. {ex.Message}");
-                ModelState.AddModelError(string.Empty, $"{StringUtils.DefaultFatalError}. {ex.Message}");
+                ModelState.AddModelError(string.Empty, $"{StringUtils.CannotSaveError}. {ex.Message}");
 
             }
 
@@ -182,7 +186,7 @@ namespace Grade.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    if(section is WeeklySection)
+                    if(section is WeeklySectionDto)
                     {
                         var sectionToAdd = _mapper.Map<WeeklySection>(section);
                         _context.Add(sectionToAdd);
@@ -202,14 +206,14 @@ namespace Grade.Controllers
             }
             catch (DbUpdateException ex)
             {
-                ModelState.AddModelError(string.Empty, StringUtils.DefaultFatalError);
+                ModelState.AddModelError(string.Empty, StringUtils.CannotSaveError);
                 _logger.LogError($"Não foi possível adicionar: {ex.Message}", ex);
             }
 
             return Conflict();
         }
 
-        public async Task<IActionResult> Edit<T>(int id, T section) where T : SectionDto
+        private async Task<IActionResult> Edit<T>(int id, T section) where T : SectionDto
         {
             if (ModelState.IsValid)
             {
@@ -234,11 +238,11 @@ namespace Grade.Controllers
                 }
                 catch (DbUpdateConcurrencyException ex)
                 {
-                    ModelState.AddModelError(string.Empty, $"Erro de concorrência. ${StringUtils.DefaultFatalError}. {ex.Message}");
+                    ModelState.AddModelError(string.Empty, $"Erro de concorrência. ${StringUtils.CannotSaveError}. {ex.Message}");
                     _logger.LogError($"Não foi possível editar: {ex.Message}", ex);
                 } catch(DbUpdateException ex)
                 {
-                    ModelState.AddModelError(string.Empty, StringUtils.DefaultFatalError);
+                    ModelState.AddModelError(string.Empty, StringUtils.CannotSaveError);
                     _logger.LogError($"Não foi possível editar: {ex.Message}", ex);
                 }
 

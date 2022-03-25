@@ -102,8 +102,8 @@ namespace Grade.Controllers
             }
             catch (DbUpdateException ex)
             {
-                ModelState.AddModelError(string.Empty, StringUtils.DefaultFatalError);
-                _logger.LogError($"Não foi possível salvar: {ex.Message}", ex);
+                ModelState.AddModelError(string.Empty, StringUtils.CannotSaveError);
+                _logger.LogError($"{StringUtils.CannotSaveError} {ex.Message}", ex);
                 
                 
             }
@@ -136,7 +136,7 @@ namespace Grade.Controllers
                 }
                 catch (DbUpdateConcurrencyException ex)
                 {
-                    ModelState.AddModelError(string.Empty, $"Erro de concorrência. ${StringUtils.DefaultFatalError}. {ex.Message}");
+                    ModelState.AddModelError(string.Empty, $"Erro de concorrência. ${StringUtils.CannotSaveError}. {ex.Message}");
                 }
             }
 
@@ -169,7 +169,7 @@ namespace Grade.Controllers
             catch (DbUpdateException ex)
             {
                 _logger.LogError($"Erro ao deletar. {ex.Message}");
-                ModelState.AddModelError(string.Empty, $"{StringUtils.DefaultFatalError}. {ex.Message}");
+                ModelState.AddModelError(string.Empty, $"{StringUtils.CannotSaveError}. {ex.Message}");
                 
             }
 
