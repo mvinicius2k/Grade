@@ -14,12 +14,15 @@ namespace Grade.Controllers
     [ApiController][Route("[controller]")]
     public class SectionsController : Controller
     {
+        #region Constants
         private const string CreateWeeklyActionRoute = $"{Constants.CreateActionRoute}WeeklySection";
         private const string CreateLooseActionRoute = $"{Constants.CreateActionRoute}LooseSection";
         private const string EditWeeklyActionRoute = $"{Constants.EditActionRoute}WeeklySection";
         private const string EditLooseActionRoute = $"{Constants.EditActionRoute}LooseSection";
+        #endregion
+
         private readonly GradeContext _context;
-        private readonly ILogger _logger;
+        private readonly ILogger<SectionsController> _logger;
         private readonly IMapper _mapper;
 
         public SectionsController(GradeContext context, ILogger<SectionsController> logger, IMapper mapper)
@@ -156,16 +159,20 @@ namespace Grade.Controllers
         [IgnoreAntiforgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            var section = await _context.Sections.FindAsync(id);
+            var section = await _context.Sections
+                .AsNoTracking()
+                .Include(x => x.Apresentations)
+                .FirstAsync(x => x.Id == id);
 
             if (section == null)
             {
                 return NotFound();
             }
-
+            
             try
             {
-                _context.Sections.Remove(section);
+                _context.Remove(section);
+                _context.RemoveRange(_context.Apresentations.Where(x => x.SectionId == section.Id));
                 await _context.SaveChangesAsync();
                 return Ok();
 
@@ -186,19 +193,26 @@ namespace Grade.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    if(section is WeeklySectionDto)
-                    {
-                        var sectionToAdd = _mapper.Map<WeeklySection>(section);
-                        _context.Add(sectionToAdd);
 
-                    } else
+                    Section sectionToAdd;
+                    if (section is WeeklySectionDto)
                     {
-                        var sectionToAdd = _mapper.Map<LooseSection>(section);
-                        _context.Add(sectionToAdd);
+                        sectionToAdd = _mapper.Map<WeeklySection>(section);
+                        _context.Add((WeeklySection)sectionToAdd);
+
+
+                    }
+                    else
+                    {
+                        sectionToAdd = _mapper.Map<LooseSection>(section);
+                        _context.Add((LooseSection)sectionToAdd);
                     }
 
+                    //Salvar para obter o id
+                    await _context.SaveChangesAsync();
 
-
+                    //Adicionando apresentações
+                    _context.Apresentations.AddRange(Apresentation.CreateObjects(section.PresentersId, sectionToAdd.Id));
                     await _context.SaveChangesAsync();
 
                     return Ok(section);
@@ -213,6 +227,11 @@ namespace Grade.Controllers
             return Conflict();
         }
 
+        
+
+        
+
+
         private async Task<IActionResult> Edit<T>(int id, T section) where T : SectionDto
         {
             if (ModelState.IsValid)
@@ -220,11 +239,12 @@ namespace Grade.Controllers
                 try
                 {
                     section.Id = id;
-
-                    if(section is WeeklySectionDto)
+                    
+                    if (section is WeeklySectionDto)
                     {
                         var sectionToUpdate = _mapper.Map<WeeklySection>(section);
                         _context.Update(sectionToUpdate);
+                        
 
                     } 
                     else
@@ -233,7 +253,13 @@ namespace Grade.Controllers
                         _context.Update(sectionToUpdate);
                     }
 
+                    //Resolvendo apresentações
+                    _context.RemoveRange(_context.Apresentations.Where(x => x.SectionId == section.Id));
+                    _context.AddRange(Apresentation.CreateObjects(section.PresentersId, id));
+
                     await _context.SaveChangesAsync();
+
+
                     return Ok(section);
                 }
                 catch (DbUpdateConcurrencyException ex)

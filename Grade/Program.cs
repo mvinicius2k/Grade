@@ -27,21 +27,26 @@ builder.Services.AddMvc(options =>
     options.Filters.Add(new IgnoreAntiforgeryTokenAttribute());
 });
 
-builder.Services.AddDbContext<GradeContext>(options =>
+builder.Logging
+    .ClearProviders()
+    .AddConsole();
+
+
+
+builder.Services
+    .AddDbContext<GradeContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString(ConnectionKey))
-            );
-builder.Services.AddDatabaseDeveloperPageExceptionFilter(); //Exibir erros
-
-builder.Services.AddControllers().AddJsonOptions(options => {
-    options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
-    //options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-    options.JsonSerializerOptions.Converters.Add(new TimeOnlyConverter(TimeOnlyConverterPattern));
-    options.JsonSerializerOptions.Converters.Add(new SectionDtoConverter());
-    
-
-    
-}); 
+            )
+    .AddDatabaseDeveloperPageExceptionFilter() //Exibir erros
+    .AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+        //options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.Converters.Add(new TimeOnlyConverter(TimeOnlyConverterPattern));
+        options.JsonSerializerOptions.Converters.Add(new SectionDtoConverter());
+    });
 
 
  builder.Services.AddSwaggerGen(g =>

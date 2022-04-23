@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Grade.Controllers
 {
-    internal class ApresentationsController : Controller
+    public class ApresentationsController : Controller
     {
         private const string GetByPresenter = $"{Constants.GetActionRoute}ByPresenter";
         private const string GetBySection = $"{Constants.GetActionRoute}BySection";
@@ -23,36 +23,14 @@ namespace Grade.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet, Route(GetByPresenter)]
-        internal async Task<ActionResult<ICollection<Apresentation>>> GetByPresenterId(int presenterId, bool includeInactive = false)
-        {
-            try
-            {
-                if (ModelState.IsValid)
-                {
-                    
-                }
-            }
-            catch (DbUpdateException ex)
-            {
-                ModelState.AddModelError(string.Empty, StringUtils.CannotSaveError);
-                _logger.LogError($"{StringUtils.CannotQueryError} {ex.Message}", ex);
-            }
-
-            return Conflict();
-        }
-
         [HttpGet, Route(Constants.CreateActionRoute)]
-        internal async Task<IActionResult> Create([FromBody]ICollection<Apresentation> apresentations)
+        public async Task<IActionResult> Create([FromBody]ICollection<Apresentation> apresentations)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
-                    
-                    _context.AddRange(apresentations);
-                    await _context.SaveChangesAsync();
-                    return Ok(apresentations);
+                    return Ok(await InternalCreate(apresentations));
                 }
             }
             catch (DbUpdateException ex)
@@ -62,7 +40,14 @@ namespace Grade.Controllers
             }
 
             return Conflict();
-        }   
+        }
+        
+        internal async Task<ICollection<Apresentation>> InternalCreate(ICollection<Apresentation> apresentations)
+        {
+            _context.AddRange(apresentations);
+            await _context.SaveChangesAsync();
+            return apresentations;
+        }
 
 
     }
