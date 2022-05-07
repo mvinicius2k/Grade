@@ -11,7 +11,7 @@ using System.Linq.Expressions;
 
 namespace Grade.Controllers
 {
-    [ApiController][Route("[controller]")]
+    [ApiController][Route(Constants.ControllerDefaultRoute)]
     public class SectionsController : Controller
     {
         private const string CreateWeeklyActionRoute = $"{Constants.CreateActionRoute}WeeklySection";
@@ -56,6 +56,7 @@ namespace Grade.Controllers
             {
                 var dto = _mapper.Map<WeeklySectionDetailsDto>(weeklySection);
                 dto.Presenters = _mapper.Map<PresenterDetailsDto[]>(weeklySection.Apresentations);
+                
                 weeklyDto.Add(dto);
             }
             foreach (var looseSection in looseSections)
@@ -198,8 +199,21 @@ namespace Grade.Controllers
                     }
 
 
-
+                    var apresentationsToAdd = new Apresentation[section.PresentersId.Length];
+                    for (int i = 0; i < apresentationsToAdd.Length; i++)
+                        apresentationsToAdd[i] = new Apresentation()
+                        {
+                            SectionId = section.Id,
+                            PresenterId = section.PresentersId[i]
+                        };
+                    
+                    
+                    RedirectToAction("Apresentations", Constants.CreateActionRoute, apresentationsToAdd) ;
+                    
                     await _context.SaveChangesAsync();
+                    
+                    
+
 
                     return Ok(section);
                 }

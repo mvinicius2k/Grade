@@ -14,7 +14,7 @@ using AutoMapper;
 
 namespace Grade.Controllers
 {
-    [ApiController][Route("[controller]")]
+    [ApiController][Route(Constants.ControllerDefaultRoute)]
     public class PresentersController : Controller
     {
         private readonly GradeContext _context;
