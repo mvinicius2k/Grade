@@ -125,6 +125,15 @@ var mapperConfig = new AutoMapper.MapperConfiguration(cfg =>
     cfg.CreateMap<LooseSectionDto, LooseSection>()
         .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id));
 
+    cfg.CreateMap<Resource, ResourceDto>()
+        .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+        .ReverseMap()
+        .IncludeAllDerived();
+    cfg.CreateMap<Resource, ResourceDetailsDto>()
+        .IncludeBase<Resource, ResourceDto>()
+        .ReverseMap();
+
+
 });
 builder.Services.AddSingleton(mapperConfig.CreateMapper());
 

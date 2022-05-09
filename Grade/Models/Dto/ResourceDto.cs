@@ -4,7 +4,7 @@ namespace Grade.Models.Dto
 {
     public class ResourceDto
     {
-        public int Id { get; set; }
+        internal int Id { get; set; }
         [Required]
         public string Url { get; set; }
         

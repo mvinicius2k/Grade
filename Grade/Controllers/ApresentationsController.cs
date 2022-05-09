@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Grade.Data;
-using Grade.Exceptions;
 using Grade.Helpers;
 using Grade.Models;
 using Grade.Models.Dto;
