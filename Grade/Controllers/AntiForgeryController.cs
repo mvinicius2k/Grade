@@ -1,10 +1,11 @@
 ﻿using Grade.Data;
+using Grade.Helpers;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Grade.Controllers
 {
-    [ApiController][Route("[controller]")]
+    [ApiController][Route( Constants.ControllerDefaultRoute)]
     public class AntiForgeryController : Controller
     {
         public const string AntiforgeryKeyHeader = "X-XRADE-TOKEN";

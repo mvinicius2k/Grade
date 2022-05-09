@@ -11,7 +11,7 @@ using System.Linq.Expressions;
 
 namespace Grade.Controllers
 {
-    [ApiController][Route("[controller]")]
+    [ApiController][Route(Constants.ControllerDefaultRoute)]
     public class SectionsController : Controller
     {
         #region Constants
@@ -59,6 +59,7 @@ namespace Grade.Controllers
             {
                 var dto = _mapper.Map<WeeklySectionDetailsDto>(weeklySection);
                 dto.Presenters = _mapper.Map<PresenterDetailsDto[]>(weeklySection.Apresentations);
+                
                 weeklyDto.Add(dto);
             }
             foreach (var looseSection in looseSections)
@@ -214,6 +215,9 @@ namespace Grade.Controllers
                     //Adicionando apresentações
                     _context.Apresentations.AddRange(Apresentation.CreateObjects(section.PresentersId, sectionToAdd.Id));
                     await _context.SaveChangesAsync();
+                    
+                    
+
 
                     return Ok(section);
                 }
