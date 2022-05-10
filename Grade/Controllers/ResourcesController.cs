@@ -19,7 +19,7 @@ public class ResourcesController : Controller
     private readonly ILogger _logger;
     private readonly IMapper _mapper;
 
-
+    public static readonly string PathDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Resources");
 
     public ResourcesController(GradeContext context, ILogger<ResourcesController> logger, IMapper mapper)
     {
@@ -37,11 +37,59 @@ public class ResourcesController : Controller
             .Select(x => _mapper.Map<Resource, ResourceDetailsDto>(x)));
     }
 
+    [HttpPost]
+    [Route("uploadImage")]
+    [IgnoreAntiforgeryToken]
+    public async Task<IActionResult> UploadImage(List<IFormFile> files)
+    {
+        try
+        {
+            if (files.Count == 0)
+                return BadRequest();
+
+            foreach (var file in files)
+            {
+                if (string.IsNullOrWhiteSpace(file.FileName))
+                {
+                    _logger.LogDebug($"{file.ToString()} inválido");
+                    continue;
+                }
+
+                var filename = file.FileName.Trim();
+
+                var finalPath = Path.Combine(PathDirectory, filename);
+
+                if (System.IO.File.Exists(finalPath))
+                {
+                    _logger.LogDebug($"{file.ToString()} já existe com o mesmo nome \"{filename}\"");
+                    continue;
+                }
+                    
+
+                using (var stream = new FileStream(finalPath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                return Ok(new { finalPath });
+            }
+
+
+        }
+        catch (Exception ex)
+        {
+            _logger.LogInformation(ex.Message);
+            return StatusCode(500);
+        }
+
+        return BadRequest();
+    }
+
 
     [HttpPost]
     [IgnoreAntiforgeryToken]
-    [Route("add")]
-    public async Task<IActionResult> Add([FromBody] ResourceDto resource)
+    [Route("link")]
+    public async Task<IActionResult> Link([FromBody] ResourceDto resource)
     {
 
         var resourceToAdd = _mapper.Map<ResourceDto, Resource>(resource);
@@ -104,5 +152,7 @@ public class ResourcesController : Controller
         _context.Resources.Remove(resource);
         return Ok();
     }
+
+    
 
 }

@@ -2,11 +2,14 @@ using Grade;
 using Grade.Controllers;
 using Grade.Converters;
 using Grade.Data;
+using Grade.Helpers;
 using Grade.Models;
 using Grade.Models.Dto;
 using Microsoft.AspNetCore.Cors.Infrastructure;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using System.Text.Json.Serialization;
 
 
@@ -20,6 +23,8 @@ var builder = WebApplication.CreateBuilder(args);
 //var startup = new Startup(builder.Configuration);
 
 //startup.ConfigureServices(builder.Services);
+
+
 
 builder.Services.AddMvc(options =>
 {
@@ -59,6 +64,8 @@ builder.Services
     });
 
 });
+
+
 
 builder.Services.AddAntiforgery(options =>
 {
@@ -178,11 +185,15 @@ app.UseSwaggerUI(c => {
 });
 
 
-/*app.UseStaticFiles(new StaticFileOptions
+if(!Directory.Exists((ResourcesController.PathDirectory)))
+    Directory.CreateDirectory(ResourcesController.PathDirectory);
+
+
+app.UseStaticFiles(new StaticFileOptions
 {
-    FileProvider = new PhysicalFileProvider(Path.Combine(builder.Environment.ContentRootPath, "Resources")),
-    RequestPath = "/resources"
-})*/
+    FileProvider = new PhysicalFileProvider(ResourcesController.PathDirectory),
+    RequestPath = new PathString("/Resources")
+});
 ;
 
 CreateDbIfNotExists();

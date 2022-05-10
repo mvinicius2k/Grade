@@ -10,5 +10,8 @@
         public const string DetailsActionRoute = "details";
         public const string EditActionRoute = "edit";
         public const string DeleteActionRoute = "delete";
+
+        //Matemática
+        public const int MegaByte = 1024 * 1024;
     }
 }
