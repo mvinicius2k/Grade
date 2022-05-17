@@ -10,11 +10,14 @@ namespace Grade.Data
     public static  class DbInitializer
     {
 
-        private const bool InsertDataTest = true;
+        private const bool Seed = true;
 
         
-        public static void Initialize(GradeContext context)
+        public static void Initialize(GradeContext context, bool restart = true)
         {
+            if(restart)
+                context.Database.EnsureDeleted();
+
             context.Database.EnsureCreated();
 
             using ILoggerFactory loggerFactory =
@@ -28,7 +31,7 @@ namespace Grade.Data
 
             
             var logger =  loggerFactory.CreateLogger<GradeContext>();
-            if (InsertDataTest && !context.Sections.Any())
+            if (Seed && !context.Sections.Any())
             {
                 
                 logger.LogInformation("DB vazio, inserindo valores teste");

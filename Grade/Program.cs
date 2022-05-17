@@ -2,11 +2,14 @@ using Grade;
 using Grade.Controllers;
 using Grade.Converters;
 using Grade.Data;
+using Grade.Helpers;
 using Grade.Models;
 using Grade.Models.Dto;
 using Microsoft.AspNetCore.Cors.Infrastructure;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using System.Text.Json.Serialization;
 
 
@@ -21,27 +24,34 @@ var builder = WebApplication.CreateBuilder(args);
 
 //startup.ConfigureServices(builder.Services);
 
+
+
 builder.Services.AddMvc(options =>
 {
     //options.Filters.Add(new ValidateAntiForgeryTokenAttribute());
     options.Filters.Add(new IgnoreAntiforgeryTokenAttribute());
 });
 
-builder.Services.AddDbContext<GradeContext>(options =>
+builder.Logging
+    .ClearProviders()
+    .AddConsole();
+
+
+
+builder.Services
+    .AddDbContext<GradeContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString(ConnectionKey))
-            );
-builder.Services.AddDatabaseDeveloperPageExceptionFilter(); //Exibir erros
-
-builder.Services.AddControllers().AddJsonOptions(options => {
-    options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
-    //options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-    options.JsonSerializerOptions.Converters.Add(new TimeOnlyConverter(TimeOnlyConverterPattern));
-    options.JsonSerializerOptions.Converters.Add(new SectionDtoConverter());
-    
-
-    
-}); 
+            )
+    .AddDatabaseDeveloperPageExceptionFilter() //Exibir erros
+    .AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+        //options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.Converters.Add(new TimeOnlyConverter(TimeOnlyConverterPattern));
+        options.JsonSerializerOptions.Converters.Add(new SectionDtoConverter());
+    });
 
 
  builder.Services.AddSwaggerGen(g =>
@@ -54,6 +64,8 @@ builder.Services.AddControllers().AddJsonOptions(options => {
     });
 
 });
+
+
 
 builder.Services.AddAntiforgery(options =>
 {
@@ -120,6 +132,15 @@ var mapperConfig = new AutoMapper.MapperConfiguration(cfg =>
     cfg.CreateMap<LooseSectionDto, LooseSection>()
         .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id));
 
+    cfg.CreateMap<Resource, ResourceDto>()
+        .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+        .ReverseMap()
+        .IncludeAllDerived();
+    cfg.CreateMap<Resource, ResourceDetailsDto>()
+        .IncludeBase<Resource, ResourceDto>()
+        .ReverseMap();
+
+
 });
 builder.Services.AddSingleton(mapperConfig.CreateMapper());
 
@@ -164,11 +185,15 @@ app.UseSwaggerUI(c => {
 });
 
 
-/*app.UseStaticFiles(new StaticFileOptions
+if(!Directory.Exists((ResourcesController.PathDirectory)))
+    Directory.CreateDirectory(ResourcesController.PathDirectory);
+
+
+app.UseStaticFiles(new StaticFileOptions
 {
-    FileProvider = new PhysicalFileProvider(Path.Combine(builder.Environment.ContentRootPath, "Resources")),
-    RequestPath = "/resources"
-})*/
+    FileProvider = new PhysicalFileProvider(ResourcesController.PathDirectory),
+    RequestPath = new PathString("/Resources")
+});
 ;
 
 CreateDbIfNotExists();

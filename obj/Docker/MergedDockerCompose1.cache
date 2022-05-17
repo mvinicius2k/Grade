@@ -27,10 +27,14 @@ services:
       com.microsoft.visualstudio.debuggee.program: dotnet
       com.microsoft.visualstudio.debuggee.workingdirectory: /app
     networks:
-      default: null
+      postgres-network: null
     ports:
     - mode: ingress
       target: 80
+      protocol: tcp
+    - mode: ingress
+      target: 80
+      published: "8000"
       protocol: tcp
     - mode: ingress
       target: 443
@@ -70,6 +74,61 @@ services:
       target: /src
       bind:
         create_host_path: true
+  pgadmin:
+    container_name: pgadmin
+    depends_on:
+      postgres:
+        condition: service_started
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_DEFAULT_USERNAME: admin
+      PGADMIN_LISTEN_PORT: "80"
+    image: dpage/pgadmin4
+    networks:
+      postgres-network: null
+    ports:
+    - mode: ingress
+      target: 80
+      published: "8080"
+      protocol: tcp
+  postgres:
+    container_name: postgres
+    environment:
+      POSTGRES_PASSWORD: admin
+      POSTGRES_USERNAME: admin
+    image: postgres
+    networks:
+      postgres-network: null
+    ports:
+    - mode: ingress
+      target: 5432
+      published: "5432"
+      protocol: tcp
+    volumes:
+    - type: volume
+      source: pgdata
+      target: /var/lib/postgresql/data
+      volume: {}
+    - type: volume
+      source: pgconf
+      target: /etc/postgresql
+      volume: {}
+    - type: volume
+      source: pglog
+      target: /var/log/postgresql
+      volume: {}
 networks:
-  default:
-    name: dockercompose6501569519004130441_default
+  postgres-network:
+    name: dockercompose6501569519004130441_postgres-network
+    driver: bridge
+volumes:
+  pgconf:
+    name: dockercompose6501569519004130441_pgconf
+    driver: local
+  pgdata:
+    name: dockercompose6501569519004130441_pgdata
+    driver: local
+  pglog:
+    name: dockercompose6501569519004130441_pglog
+    driver: local
