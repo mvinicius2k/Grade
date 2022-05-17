@@ -1,0 +1,54 @@
+version: '3.4'
+
+services:
+  grade:
+    image: ${DOCKER_REGISTRY-}grade
+    build:
+      context: .
+      dockerfile: Grade/Dockerfile
+    ports:
+      - "8000:80"
+    networks:
+      - postgres-network
+  postgres:
+    container_name: postgres
+    image: postgres
+    environment:
+      POSTGRES_USERNAME: "admin"
+      POSTGRES_PASSWORD: "admin"
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - pgconf:/etc/postgresql
+      - pglog:/var/log/postgresql
+    networks:
+    - postgres-network
+      
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "admin@admin.com"
+      PGADMIN_DEFAULT_USERNAME: "admin"
+      PGADMIN_DEFAULT_PASSWORD: "admin"
+      PGADMIN_LISTEN_PORT: 80
+    ports:
+      - "8080:80"
+    depends_on:
+      - postgres
+    
+    networks:
+      - postgres-network
+
+networks: 
+  postgres-network:
+    driver: bridge
+
+volumes:
+  pgdata:
+    driver: local
+  pgconf:
+    driver: local
+  pglog:
+    driver: local
