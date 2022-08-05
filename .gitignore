@@ -1,3 +1,5 @@
 Grade/bin
 Grade/obj
-.vs/
+Grade/.config
+obj
+bin
