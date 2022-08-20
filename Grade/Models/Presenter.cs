@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Grade.Models
 {
-    public class Presenter
+    public class Presenter : IId 
     {
         public int Id { get; set; }
 

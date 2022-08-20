@@ -2,7 +2,7 @@
 
 namespace Grade.Models
 {
-    public class Resource : IResolveTypesPgsql
+    public class Resource : IResolveTypesPgsql, IId
     {
         public int Id { get; set; }
         [Required]

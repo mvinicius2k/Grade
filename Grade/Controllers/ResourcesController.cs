@@ -12,6 +12,9 @@ public class ResourcesController : Controller
 {
 
     #region Constants
+    public const string UploadImageRoute = "uploadImage";
+    public const string ImageLinkRoute = "link";
+    public const string ReplaceRoute = "replace";
 
     #endregion
 
@@ -29,7 +32,7 @@ public class ResourcesController : Controller
     }
 
     [HttpGet]
-    [Route("getAll")]
+    [Route(Constants.GetAllActionRoute)]
     public ActionResult GetAll()
     {
         return Ok(_context.Resources
@@ -38,7 +41,7 @@ public class ResourcesController : Controller
     }
 
     [HttpPost]
-    [Route("uploadImage")]
+    [Route(UploadImageRoute)]
     [IgnoreAntiforgeryToken]
     public async Task<IActionResult> UploadImage(List<IFormFile> files)
     {
@@ -47,48 +50,67 @@ public class ResourcesController : Controller
             if (files.Count == 0)
                 return BadRequest();
 
+            var uploadRequests = new LinkedList<FileUploadResponse>();
+
+            bool containsInvalid = false;
             foreach (var file in files)
             {
-                if (string.IsNullOrWhiteSpace(file.FileName))
-                {
-                    _logger.LogDebug($"{file.ToString()} inválido");
-                    continue;
-                }
-
                 var filename = file.FileName.Trim();
 
                 var finalPath = Path.Combine(PathDirectory, filename);
 
-                if (System.IO.File.Exists(finalPath))
+                FileUploadResponse? uploadResponse = null;
+
+
+                if (string.IsNullOrWhiteSpace(file.FileName))
+                    uploadResponse = new FileUploadResponse() { Name = filename, Result = UploadResult.InvalidName };
+                else if (!Constants.MimeImage.Contains(file.ContentType))
+                    uploadResponse = new FileUploadResponse() { Name = filename, Result = UploadResult.InvalidType };
+                else if (System.IO.File.Exists(finalPath))
+                    uploadResponse = new FileUploadResponse() { Name = filename, Result = UploadResult.Duplicated };
+
+                if(uploadResponse != null)
                 {
-                    _logger.LogDebug($"{file.ToString()} já existe com o mesmo nome \"{filename}\"");
+                    uploadRequests.AddLast(uploadResponse);
+                    containsInvalid = true;
                     continue;
                 }
-                    
+
 
                 using (var stream = new FileStream(finalPath, FileMode.Create))
                 {
                     await file.CopyToAsync(stream);
+
+                    uploadResponse = new FileUploadResponse()
+                    {
+                        Name = filename,
+                        Result = UploadResult.Success,
+                        ResourceResult = await Link(new ResourceDto() { Url = finalPath })
+
+                    };
+                    uploadRequests.AddLast(uploadResponse);
                 }
 
-                return Ok(new { finalPath });
             }
 
+            
+            int statusCode = containsInvalid ? StatusCodes.Status207MultiStatus : StatusCodes.Status200OK;
+            return StatusCode(statusCode, uploadRequests);
 
         }
         catch (Exception ex)
         {
             _logger.LogInformation(ex.Message);
-            return StatusCode(500);
+            return StatusCode(StatusCodes.Status500InternalServerError);
         }
 
-        return BadRequest();
+        
     }
 
 
     [HttpPost]
     [IgnoreAntiforgeryToken]
-    [Route("link")]
+    [Route(ImageLinkRoute)]
     public async Task<IActionResult> Link([FromBody] ResourceDto resource)
     {
 
@@ -105,9 +127,10 @@ public class ResourcesController : Controller
         return Conflict();
 
     }
+
     [HttpPut]
     [IgnoreAntiforgeryToken]
-    [Route("replace")]
+    [Route(ReplaceRoute)]
     public async Task<IActionResult> Replace(int id, [FromBody] ResourceDto resource)
     {
         if (ModelState.IsValid)
@@ -124,7 +147,7 @@ public class ResourcesController : Controller
 
     [HttpDelete]
     [IgnoreAntiforgeryToken]
-    [Route("delete")]
+    [Route(Constants.DeleteActionRoute)]
     public async Task<IActionResult> Delete(int id, bool preventDeleteAUsefull = true)
     {
         Resource? resource = null;

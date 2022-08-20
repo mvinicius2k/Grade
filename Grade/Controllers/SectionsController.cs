@@ -33,7 +33,7 @@ namespace Grade.Controllers
         }
 
         [HttpGet]
-        [Route("getAll")]
+        [Route(Constants.GetAllActionRoute)]
         public async Task<IActionResult> GetAllWithDetails(string? sortOrder = null, bool includeInactive = false)
         {
             var weeklySections = await _context.WeeklySections
@@ -99,7 +99,7 @@ namespace Grade.Controllers
 
         }
         [HttpGet]
-        [Route("details")]
+        [Route(Constants.DetailsActionRoute)]
         public async Task<IActionResult> Details([FromQuery] int id)
         {
             var section = await _context.Sections

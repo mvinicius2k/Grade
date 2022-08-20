@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Grade.Models
 {
-    public abstract class Section
+    public abstract class Section : IId
     {
         public int Id { get; set; }
 

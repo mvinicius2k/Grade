@@ -1,7 +1,7 @@
 ﻿namespace Grade.Models
 {
 
-    public class Apresentation
+    public class Apresentation : IId
     {
         public int Id { get; set; }
         public int PresenterId { get; set; }

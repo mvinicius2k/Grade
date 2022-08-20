@@ -32,19 +32,20 @@ namespace Grade.Controllers
 
         
         [HttpGet]
-        [Route("getAll")]
-        public async Task <IActionResult> GetAll(string sortOrder = null)
+        [Route(Constants.GetAllActionRoute)]
+        public async Task <IActionResult> GetAll(string sortOrder = null,int page = 1, int pageSize = Constants.PageSize)
         {
-
+            page--;
             var presenters = _context.Presenters;
 
+            
 
             switch (sortOrder)
             {
                 case "name_desc":
-                    return Ok(presenters.OrderByDescending(x => x.Name).ToList());
+                    return Ok(presenters.AsNoTracking().OrderByDescending(x => x.Name).Skip(page * pageSize).Take(pageSize).ToList());
                 default:
-                    return Ok(presenters.OrderBy(x => x.Name).ToList());
+                    return Ok(presenters.OrderBy(x => x.Name).Skip(page * pageSize).Take(pageSize).ToList());
 
 
             }
@@ -52,7 +53,7 @@ namespace Grade.Controllers
         }
 
         // GET: Presenters/Details/5
-        [HttpGet("details/")]
+        [HttpGet(Constants.DetailsActionRoute)]
         public async Task<IActionResult> Details(int id)
         {
 
@@ -84,7 +85,7 @@ namespace Grade.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [IgnoreAntiforgeryToken]
-        [Route("create")]
+        [Route(Constants.CreateActionRoute)]
         public async Task<IActionResult> Create([FromBody] PresenterDto presenter)
         {
             try
@@ -119,7 +120,7 @@ namespace Grade.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPut]
         [IgnoreAntiforgeryToken]
-        [Route("edit")]
+        [Route(Constants.EditActionRoute)]
         public async Task<IActionResult> Edit(int id,[FromBody] PresenterDto presenter)
         {
            
@@ -148,7 +149,7 @@ namespace Grade.Controllers
         // POST: Presenters/Delete/5
         [IgnoreAntiforgeryToken]
         [HttpDelete]
-        [Route("delete")]
+        [Route(Constants.DeleteActionRoute)]
         public async Task<IActionResult> Delete(int id)
         {
            
