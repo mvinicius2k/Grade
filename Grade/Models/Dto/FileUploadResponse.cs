@@ -6,6 +6,7 @@ namespace Grade.Models.Dto
     {
         public string Name { get; set; }
         public UploadResult Result { get; set; }
+        
         public object ResourceResult {get;set;}
 
         

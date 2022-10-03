@@ -12,8 +12,8 @@ namespace Grade.Models
         [Required][MaxLength(200)]
         public string Description { get; set; }
         public bool Active { get; set; }
-        
         public int? ResourceId { get; set; }
+
 
         public ICollection<Apresentation> Apresentations { get; set; }
 
