@@ -10,7 +10,7 @@ namespace Grade.Data
     public static  class DbInitializer
     {
 
-        private const bool Seed = false;
+        private const bool Seed = true;
 
         
         public static void Initialize(GradeContext context, bool restart = true)
