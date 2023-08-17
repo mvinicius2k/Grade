@@ -114,19 +114,19 @@ namespace Grade.Data
 
             context.SaveChanges();
 
-            var apresentations = new Apresentation[]
+            var presentations = new Presentation[]
             {
-                new Apresentation
+                new Presentation
                 {
                     PresenterId = context.Presenters.First(x => x.Name == "Valdenir Rodrigues").Id,
                     SectionId = context.Sections.First(x => x.Name == "Asa Branca Esporte Clube").Id,
                 },
-                new Apresentation
+                new Presentation
                 {
                     PresenterId = context.Presenters.First(x => x.Name == "Playlist").Id,
                     SectionId = context.Sections.First(x => x.Name == "Tarde Show").Id,
                 },
-                new Apresentation
+                new Presentation
                 {
                     PresenterId = context.Presenters.First(x => x.Name == "Equipe Esportiva").Id,
                     SectionId = context.Sections.First(x => x.Name == "Jornada Esportiva").Id,
@@ -134,10 +134,10 @@ namespace Grade.Data
             };
 
             logger.LogInformation("Inserindo apresentação");
-            foreach(var apresentation in apresentations)
+            foreach(var apresentation in presentations)
             {
                 logger.LogInformation(apresentation.ToString());
-                context.Apresentations.Add(apresentation);
+                context.Presentations.Add(apresentation);
 
             }
             context.SaveChanges();

@@ -52,14 +52,13 @@ namespace Grade.Controllers
 
         }
 
-        // GET: Presenters/Details/5
         [HttpGet(Constants.DetailsActionRoute)]
         public async Task<IActionResult> Details(int id)
         {
 
 
             var presenter = await _context.Presenters
-                .Include(x => x.Apresentations)
+                .Include(x => x.Presentations)
                 .ThenInclude(x => x.Section)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -71,7 +70,7 @@ namespace Grade.Controllers
 
             //var presenterDto = PresenterDetailsDto.FromPresenter(presenter, _mapper);
             var presenterDto = _mapper.Map<PresenterDetailsDto>(presenter);
-            presenterDto.Sections = _mapper.Map<SectionDto[]>(presenter.Apresentations);
+            presenterDto.Sections = _mapper.Map<SectionDto[]>(presenter.Presentations);
 
             return Ok(presenterDto);
         }
@@ -80,11 +79,7 @@ namespace Grade.Controllers
        
 
 
-        // POST: Presenters/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        [IgnoreAntiforgeryToken]
         [Route(Constants.CreateActionRoute)]
         public async Task<IActionResult> Create([FromBody] PresenterDto presenter)
         {
@@ -115,11 +110,7 @@ namespace Grade.Controllers
         }
         
 
-        // POST: Presenters/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPut]
-        [IgnoreAntiforgeryToken]
         [Route(Constants.EditActionRoute)]
         public async Task<IActionResult> Edit(int id,[FromBody] PresenterDto presenter)
         {
@@ -146,8 +137,6 @@ namespace Grade.Controllers
         }
 
 
-        // POST: Presenters/Delete/5
-        [IgnoreAntiforgeryToken]
         [HttpDelete]
         [Route(Constants.DeleteActionRoute)]
         public async Task<IActionResult> Delete(int id)

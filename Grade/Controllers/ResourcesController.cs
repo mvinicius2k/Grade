@@ -21,14 +21,18 @@ public class ResourcesController : Controller
     private readonly GradeContext _context;
     private readonly ILogger _logger;
     private readonly IMapper _mapper;
+    private readonly IWebHostEnvironment _environment;
 
-    public static readonly string PathDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Resources");
+    private string pathDirectory;
 
-    public ResourcesController(GradeContext context, ILogger<ResourcesController> logger, IMapper mapper)
+    public ResourcesController(GradeContext context, ILogger<ResourcesController> logger, IMapper mapper, IWebHostEnvironment environment)
     {
         _context = context;
         _logger = logger;
         _mapper = mapper;
+        _environment = environment;
+
+        pathDirectory = Path.Combine(environment.WebRootPath, "resources");
     }
 
     [HttpGet]
@@ -42,13 +46,15 @@ public class ResourcesController : Controller
 
     [HttpPost]
     [Route(UploadImageRoute)]
-    [IgnoreAntiforgeryToken]
     public async Task<IActionResult> UploadImage(List<IFormFile> files)
     {
         try
         {
             if (files.Count == 0)
                 return BadRequest();
+            
+            if (!Directory.Exists((pathDirectory)))
+                Directory.CreateDirectory(pathDirectory);
 
             var uploadRequests = new LinkedList<FileUploadResponse>();
 
@@ -57,7 +63,7 @@ public class ResourcesController : Controller
             {
                 var filename = file.FileName.Trim();
 
-                var finalPath = Path.Combine(PathDirectory, filename);
+                var finalPath = Path.Combine(pathDirectory, filename);
 
                 FileUploadResponse? uploadResponse = null;
 
@@ -109,7 +115,6 @@ public class ResourcesController : Controller
 
 
     [HttpPost]
-    [IgnoreAntiforgeryToken]
     [Route(ImageLinkRoute)]
     public async Task<IActionResult> Link([FromBody] ResourceDto resource)
     {
@@ -129,7 +134,6 @@ public class ResourcesController : Controller
     }
 
     [HttpPut]
-    [IgnoreAntiforgeryToken]
     [Route(ReplaceRoute)]
     public async Task<IActionResult> Replace(int id, [FromBody] ResourceDto resource)
     {
@@ -146,7 +150,6 @@ public class ResourcesController : Controller
     }
 
     [HttpDelete]
-    [IgnoreAntiforgeryToken]
     [Route(Constants.DeleteActionRoute)]
     public async Task<IActionResult> Delete(int id, bool preventDeleteAUsefull = true)
     {

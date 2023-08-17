@@ -15,7 +15,7 @@ namespace Grade.Data
         }
 
         public DbSet<Presenter> Presenters { get; set; }
-        public DbSet<Apresentation> Apresentations { get; set; }
+        public DbSet<Presentation> Presentations { get; set; }
         public DbSet<Section> Sections { get; set; }
         public DbSet<WeeklySection> WeeklySections { get; set; }
         public DbSet<LooseSection> LooseSections { get; set; }
@@ -26,17 +26,17 @@ namespace Grade.Data
             
             mb.Entity<Resource>().ToTable(nameof(Resource));
             mb.Entity<Section>().ToTable(nameof(Section))
-                .HasMany(x => x.Apresentations)
+                .HasMany(x => x.Presentations)
                 .WithOne(x => x.Section)
                 .OnDelete(DeleteBehavior.Cascade);
             mb.Entity<LooseSection>().ToTable(nameof(LooseSection));
             mb.Entity<WeeklySection>().ToTable(nameof(WeeklySection))
-                .HasMany(x => x.Apresentations)
+                .HasMany(x => x.Presentations)
                 .WithOne(x => x.Section as WeeklySection)
                 .OnDelete(DeleteBehavior.Cascade); ;
-            mb.Entity<Apresentation>().ToTable(nameof(Apresentation));
+            mb.Entity<Presentation>().ToTable(nameof(Presentation));
             mb.Entity<Presenter>().ToTable(nameof(Presenter))
-                .HasMany(x => x.Apresentations)
+                .HasMany(x => x.Presentations)
                 .WithOne(x => x.Presenter)
                 .OnDelete(DeleteBehavior.Cascade);
 

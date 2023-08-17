@@ -38,14 +38,14 @@ namespace Grade.Controllers
         {
             var weeklySections = await _context.WeeklySections
                     .Where(x => x.Active || includeInactive)
-                    .Include(x => x.Apresentations)
+                    .Include(x => x.Presentations)
                     .ThenInclude(x => x.Presenter)
                     .AsNoTracking()
                     .ToListAsync();
 
             var looseSections = await _context.LooseSections
                 .Where(x => x.Active || includeInactive)
-                .Include(x => x.Apresentations)
+                .Include(x => x.Presentations)
                 .ThenInclude(x => x.Presenter)
                 .AsNoTracking()
                 .ToListAsync();
@@ -58,14 +58,14 @@ namespace Grade.Controllers
             foreach (var weeklySection in weeklySections)
             {
                 var dto = _mapper.Map<WeeklySectionDetailsDto>(weeklySection);
-                dto.Presenters = _mapper.Map<PresenterDetailsDto[]>(weeklySection.Apresentations);
+                dto.Presenters = _mapper.Map<PresenterDetailsDto[]>(weeklySection.Presentations);
                 
                 weeklyDto.Add(dto);
             }
             foreach (var looseSection in looseSections)
             {
                 var dto = _mapper.Map<LooseSectionDetailsDto>(looseSection);
-                dto.Presenters = _mapper.Map<PresenterDetailsDto[]>(looseSection.Apresentations);
+                dto.Presenters = _mapper.Map<PresenterDetailsDto[]>(looseSection.Presentations);
                 looseDto.Add(dto);
             }
 
@@ -103,7 +103,7 @@ namespace Grade.Controllers
         public async Task<IActionResult> Details([FromQuery] int id)
         {
             var section = await _context.Sections
-                .Include(x => x.Apresentations)
+                .Include(x => x.Presentations)
                 .ThenInclude(x => x.Presenter)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Id == id);
@@ -114,14 +114,14 @@ namespace Grade.Controllers
             if(section is WeeklySection)
             {
                 var dto =_mapper.Map<WeeklySectionDetailsDto>(section);
-                dto.Presenters = _mapper.Map<PresenterDetailsDto[]>(section.Apresentations);
+                dto.Presenters = _mapper.Map<PresenterDetailsDto[]>(section.Presentations);
                 return Ok(dto);
             }
 
             else
             {
                 var dto = _mapper.Map<LooseSectionDetailsDto>(section);
-                dto.Presenters = _mapper.Map<PresenterDetailsDto[]>(section.Apresentations);
+                dto.Presenters = _mapper.Map<PresenterDetailsDto[]>(section.Presentations);
                 return Ok(dto);
 
             }
@@ -133,36 +133,31 @@ namespace Grade.Controllers
 
         [HttpPost]
         [Route(CreateWeeklyActionRoute)]
-        [IgnoreAntiforgeryToken]
         public async Task<IActionResult> CreateWeeklySection([FromBody] WeeklySectionDto section) => 
             await Create(section);
         
         [HttpPost]
         [Route(CreateLooseActionRoute)]
-        [IgnoreAntiforgeryToken]
         public async Task<IActionResult> CreateLooseSection([FromBody] LooseSectionDto section) => 
             await Create(section);
 
         [HttpPut]
         [Route(EditWeeklyActionRoute)]
-        [IgnoreAntiforgeryToken]
         public async Task<IActionResult> EditWeeklySection(int id, [FromBody] WeeklySectionDto section) =>
             await Edit(id,section);
 
         [HttpPut]
         [Route(EditLooseActionRoute)]
-        [IgnoreAntiforgeryToken]
         public async Task<IActionResult> EditLooseSection(int id, [FromBody] LooseSectionDto section) =>
             await Edit(id, section);
 
         [HttpDelete]
         [Route(Constants.DeleteActionRoute)]
-        [IgnoreAntiforgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
             var section = await _context.Sections
                 .AsNoTracking()
-                .Include(x => x.Apresentations)
+                .Include(x => x.Presentations)
                 .FirstAsync(x => x.Id == id);
 
             if (section == null)
@@ -173,7 +168,7 @@ namespace Grade.Controllers
             try
             {
                 _context.Remove(section);
-                _context.RemoveRange(_context.Apresentations.Where(x => x.SectionId == section.Id));
+                _context.RemoveRange(_context.Presentations.Where(x => x.SectionId == section.Id));
                 await _context.SaveChangesAsync();
                 return Ok();
 
@@ -213,7 +208,7 @@ namespace Grade.Controllers
                     await _context.SaveChangesAsync();
 
                     //Adicionando apresentações
-                    _context.Apresentations.AddRange(Apresentation.CreateObjects(section.PresentersId, sectionToAdd.Id));
+                    _context.Presentations.AddRange(Presentation.CreateObjects(section.PresentersId, sectionToAdd.Id));
                     await _context.SaveChangesAsync();
                     
                     
@@ -258,8 +253,8 @@ namespace Grade.Controllers
                     }
 
                     //Resolvendo apresentações
-                    _context.RemoveRange(_context.Apresentations.Where(x => x.SectionId == section.Id));
-                    _context.AddRange(Apresentation.CreateObjects(section.PresentersId, id));
+                    _context.RemoveRange(_context.Presentations.Where(x => x.SectionId == section.Id));
+                    _context.AddRange(Presentation.CreateObjects(section.PresentersId, id));
 
                     await _context.SaveChangesAsync();
 

@@ -67,10 +67,7 @@ builder.Services
 
 
 
-builder.Services.AddAntiforgery(options =>
-{
-    options.HeaderName = AntiForgeryController.AntiforgeryKeyHeader;
-});
+
 
 var mapperConfig = new AutoMapper.MapperConfiguration(cfg =>
 {
@@ -88,16 +85,16 @@ var mapperConfig = new AutoMapper.MapperConfiguration(cfg =>
     cfg.CreateMap<Section, WeeklySectionDetailsDto>()
         .ForMember(dest => dest.ImageResource, opt => opt.MapFrom(src => src.Resource))
         .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
-        .ForMember(dest => dest.Presenters, opt => opt.MapFrom(src => src.Apresentations));
+        .ForMember(dest => dest.Presenters, opt => opt.MapFrom(src => src.Presentations));
 
     cfg.CreateMap<Section, LooseSectionDetailsDto>()
         .ForMember(dest => dest.ImageResource, opt => opt.MapFrom(src => src.Resource))
-        .ForMember(dest => dest.Presenters, opt => opt.MapFrom(src => src.Apresentations));
+        .ForMember(dest => dest.Presenters, opt => opt.MapFrom(src => src.Presentations));
 
     /*
      * Extrai um SectionDto de um Apresentation
      */
-    cfg.CreateMap<Apresentation, SectionDto>()
+    cfg.CreateMap<Presentation, SectionDto>()
     .ConvertUsing((apresentation, _, context) =>
     {
         return context.Mapper.Map<Section, SectionDto>(apresentation.Section);
@@ -108,7 +105,7 @@ var mapperConfig = new AutoMapper.MapperConfiguration(cfg =>
     /*
      * Extrai um PresenterDetailsDto de um Apresentation
      */
-    cfg.CreateMap<Apresentation, PresenterDetailsDto>()
+    cfg.CreateMap<Presentation, PresenterDetailsDto>()
     .ConvertUsing((apresentation, _, context) =>
     {
         return context.Mapper.Map<Presenter, PresenterDetailsDto>(apresentation.Presenter);
@@ -153,7 +150,6 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
     
@@ -185,15 +181,10 @@ app.UseSwaggerUI(c => {
 });
 
 
-if(!Directory.Exists((ResourcesController.PathDirectory)))
-    Directory.CreateDirectory(ResourcesController.PathDirectory);
 
 
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(ResourcesController.PathDirectory),
-    RequestPath = new PathString("/Resources")
-});
+
+app.UseStaticFiles();
 ;
 
 CreateDbIfNotExists();

@@ -16,7 +16,7 @@ namespace Grade.Models
         
         public int? ResourceId { get; set; }
 
-        public ICollection<Apresentation> Apresentations { get; set; }
+        public ICollection<Presentation> Presentations { get; set; }
 
         public Resource Resource { get; set; }
 

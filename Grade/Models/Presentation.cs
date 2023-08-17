@@ -1,7 +1,7 @@
 ﻿namespace Grade.Models
 {
 
-    public class Apresentation : IId
+    public class Presentation : IId
     {
         public int Id { get; set; }
         public int PresenterId { get; set; }
@@ -10,20 +10,20 @@
         public Presenter Presenter { get; set; }
         public Section Section { get; set; }
 
-        public static Apresentation[] CreateObjects(int[] presenterIds, int sectionId)
+        public static Presentation[] CreateObjects(int[] presenterIds, int sectionId)
         {
-            var apresentations = new Apresentation[presenterIds.Length];
+            var presentations = new Presentation[presenterIds.Length];
 
-            for (int i = 0; i < apresentations.Length; i++)
+            for (int i = 0; i < presentations.Length; i++)
             {
-                apresentations[i] = new Apresentation()
+                presentations[i] = new Presentation()
                 {
                     PresenterId = presenterIds[i],
                     SectionId = sectionId
                 };
             }
 
-            return apresentations;
+            return presentations;
         }
         
     }

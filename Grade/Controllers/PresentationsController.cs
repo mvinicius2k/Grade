@@ -9,20 +9,18 @@ using Microsoft.EntityFrameworkCore;
 namespace Grade.Controllers
 {
     [ApiController][Route(Constants.ControllerDefaultRoute)]
-    public class ApresentationsController : Controller
+    public class PresentationsController : Controller
     {
         private const string GetByPresenterActionName = $"{Constants.GetActionRoute}ByPresenter";
         private const string GetBySectionActionName = $"{Constants.GetActionRoute}BySection";
 
         private readonly GradeContext _context;
         private readonly ILogger _logger;
-        private readonly IMapper _mapper;
 
-        internal ApresentationsController(GradeContext context, ILogger<ApresentationsController> logger, IMapper mapper)
+        public PresentationsController(GradeContext context, ILogger<PresentationsController> logger, IMapper mapper)
         {
             _context = context;
             _logger = logger;
-            _mapper = mapper;
         }
 
         
@@ -32,10 +30,10 @@ namespace Grade.Controllers
             
             if (ModelState.IsValid)
             {
-                var apresentations = await _context.Apresentations
+                var presentations = await _context.Presentations
                     .Where(a => (includeInactive || a.Section.Active) && a.PresenterId == presenterId)
                     .ToArrayAsync();
-                return Ok(apresentations);
+                return Ok(presentations);
             }
             return Conflict();
 
@@ -47,27 +45,27 @@ namespace Grade.Controllers
 
             if (ModelState.IsValid)
             {
-                var apresentations = await _context.Apresentations
+                var presentations = await _context.Presentations
                     .Where(x => (includeInactive || x.Section.Active) && x.SectionId == sectionId)
                     .ToArrayAsync();
-                return Ok(apresentations);
+                return Ok(presentations);
             }
             return Conflict();
 
         }
 
 
-        [HttpPost, Route(Constants.CreateActionRoute), IgnoreAntiforgeryToken]
-        public async Task<IActionResult> Create([FromBody]ICollection<Apresentation> apresentations)
+        [HttpPost, Route(Constants.CreateActionRoute)]
+        public async Task<IActionResult> Create([FromBody]ICollection<Presentation> presentations)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
                     
-                    _context.AddRange(apresentations);
+                    _context.AddRange(presentations);
                     await _context.SaveChangesAsync();
-                    return Ok(apresentations);
+                    return Ok(presentations);
                 }
             }
             catch (DbUpdateException ex)
@@ -78,16 +76,16 @@ namespace Grade.Controllers
 
             return Conflict();
         }
-        [HttpPut, Route(Constants.EditActionRoute), IgnoreAntiforgeryToken]
-        public async Task<IActionResult> Edit([FromBody] ICollection<Apresentation> apresentations)
+        [HttpPut, Route(Constants.EditActionRoute),]
+        public async Task<IActionResult> Edit([FromBody] ICollection<Presentation> presentations)
         {
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.UpdateRange(apresentations);
+                    _context.UpdateRange(presentations);
                     await _context.SaveChangesAsync();
-                    return Ok(apresentations);
+                    return Ok(presentations);
 
                 }
                 catch (DbUpdateException ex)
@@ -99,16 +97,16 @@ namespace Grade.Controllers
 
             return Conflict();
         }
-        [HttpDelete, Route(Constants.DeleteActionRoute), IgnoreAntiforgeryToken]
+        [HttpDelete, Route(Constants.DeleteActionRoute),]
         public async Task<IActionResult> Delete(ICollection<int> ids)
         {
-            var apresentations = await _context.Apresentations.Where(x => ids.Contains(x.Id)).ToListAsync();
-            if (apresentations == null || apresentations.Count == 0)
+            var presentations = await _context.Presentations.Where(x => ids.Contains(x.Id)).ToListAsync();
+            if (presentations == null || presentations.Count == 0)
                 return NotFound();
 
             try
             {
-                _context.RemoveRange(apresentations);
+                _context.RemoveRange(presentations);
                 await _context.SaveChangesAsync();
                 return Ok();
             }
